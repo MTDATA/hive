@@ -7,4 +7,5 @@ build-eclipse
 .settings
 *.launch
 *~
+*.swp
 metastore_db
