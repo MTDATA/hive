@@ -1,0 +1,22 @@
+PREHOOK: query: DESCRIBE FUNCTION datekey2date
+PREHOOK: type: DESCFUNCTION
+POSTHOOK: query: DESCRIBE FUNCTION datekey2date
+POSTHOOK: type: DESCFUNCTION
+datekey2date(expr) - Cast datekey to date
+PREHOOK: query: DESCRIBE FUNCTION EXTENDED datekey2date
+PREHOOK: type: DESCFUNCTION
+POSTHOOK: query: DESCRIBE FUNCTION EXTENDED datekey2date
+POSTHOOK: type: DESCFUNCTION
+datekey2date(expr) - Cast datekey to date
+Example:
+   > SELECT datekey2date('20120909') FROM src LIMIT 1;
+  '2012-09-09'
+PREHOOK: query: select datekey2date('20120909') from src limit 1
+PREHOOK: type: QUERY
+PREHOOK: Input: default@src
+#### A masked pattern was here ####
+POSTHOOK: query: select datekey2date('20120909') from src limit 1
+POSTHOOK: type: QUERY
+POSTHOOK: Input: default@src
+#### A masked pattern was here ####
+2012-09-09

@@ -1,0 +1,32 @@
+PREHOOK: query: DESCRIBE FUNCTION substring_index
+PREHOOK: type: DESCFUNCTION
+POSTHOOK: query: DESCRIBE FUNCTION substring_index
+POSTHOOK: type: DESCFUNCTION
+substring_index(str, delim, count) - returns the substring of str before count occurrences of the delimiter delim. 
+PREHOOK: query: DESCRIBE FUNCTION EXTENDED substring_index
+PREHOOK: type: DESCFUNCTION
+POSTHOOK: query: DESCRIBE FUNCTION EXTENDED substring_index
+POSTHOOK: type: DESCFUNCTION
+substring_index(str, delim, count) - returns the substring of str before count occurrences of the delimiter delim. 
+If count is positive, everything to the left of the final delimiter (counting from the left) is returned. If count is negative, everything to the right of the final delimiter (counting from the right) is returned.
+Example:
+   > SELECT substring_index('www.mysql.com', '.' 2) FROM src LIMIT 1;
+  'www.mysql'
+  > SELECT substring_index('www.mysql.com', -2) FROM src LIMIT 1;
+  'mysql.com'
+
+PREHOOK: query: SELECT
+  substring_index('www.mysql.com', '.', -1),
+  substring_index('www.mysql.com', '.', 2)
+FROM src LIMIT 1
+PREHOOK: type: QUERY
+PREHOOK: Input: default@src
+#### A masked pattern was here ####
+POSTHOOK: query: SELECT
+  substring_index('www.mysql.com', '.', -1),
+  substring_index('www.mysql.com', '.', 2)
+FROM src LIMIT 1
+POSTHOOK: type: QUERY
+POSTHOOK: Input: default@src
+#### A masked pattern was here ####
+com	www.mysql

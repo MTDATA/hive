@@ -1,0 +1,12 @@
+PREHOOK: query: DESCRIBE FUNCTION rank
+PREHOOK: type: DESCFUNCTION
+POSTHOOK: query: DESCRIBE FUNCTION rank
+POSTHOOK: type: DESCFUNCTION
+rank(expr) - assign rank order to sorted record set
+PREHOOK: query: DESCRIBE FUNCTION EXTENDED rank
+PREHOOK: type: DESCFUNCTION
+POSTHOOK: query: DESCRIBE FUNCTION EXTENDED rank
+POSTHOOK: type: DESCFUNCTION
+rank(expr) - assign rank order to sorted record set
+Example:
+  > SELECT rank(key) FROM src DISTRIBUTE BY key SORT BY key, value ;

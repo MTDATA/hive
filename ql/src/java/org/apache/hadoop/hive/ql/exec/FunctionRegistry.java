@@ -35,6 +35,13 @@ import java.util.regex.PatternSyntaxException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import com.meituan.hive.udf.UDFMd5;
+import com.meituan.hive.udf.UDFRank;
+import com.meituan.hive.udf.UDFSubstring_index;
+import com.meituan.hive.udf.UDFD2d;
+import com.meituan.hive.udf.UDFDate2datekey;
+import com.meituan.hive.udf.UDFDatekey2date;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hive.ql.metadata.HiveException;
@@ -241,6 +248,12 @@ public final class FunctionRegistry {
    */
   static Map<String, FunctionInfo> mFunctions = new LinkedHashMap<String, FunctionInfo>();
   static {
+    registerUDF("md5", UDFMd5.class, false);
+    registerUDF("rank", UDFRank.class, false);
+    registerUDF("substring_index", UDFSubstring_index.class, false);
+    registerUDF("d2d", UDFD2d.class, false);
+    registerUDF("date2datekey", UDFDate2datekey.class, false);
+    registerUDF("datekey2date", UDFDatekey2date.class, false);
     registerUDF("concat", UDFConcat.class, false);
     registerUDF("substr", UDFSubstr.class, false);
     registerUDF("substring", UDFSubstr.class, false);

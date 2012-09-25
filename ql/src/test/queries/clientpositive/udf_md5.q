@@ -1,0 +1,7 @@
+DESCRIBE FUNCTION md5;
+DESCRIBE FUNCTION EXTENDED md5;
+
+SELECT
+  md5(null),
+  md5('www.mysql.com')
+FROM src LIMIT 1;

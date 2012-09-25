@@ -1,0 +1,31 @@
+PREHOOK: query: DESCRIBE FUNCTION md5
+PREHOOK: type: DESCFUNCTION
+POSTHOOK: query: DESCRIBE FUNCTION md5
+POSTHOOK: type: DESCFUNCTION
+md5(str) - Calculates an MD5 128-bit checksum for the string.
+PREHOOK: query: DESCRIBE FUNCTION EXTENDED md5
+PREHOOK: type: DESCFUNCTION
+POSTHOOK: query: DESCRIBE FUNCTION EXTENDED md5
+POSTHOOK: type: DESCFUNCTION
+md5(str) - Calculates an MD5 128-bit checksum for the string.
+The value is returned as a string of 32 hex digits, or NULL if the argument was NULL. 
+The return value can, for example, be used as a hash key. 
+Example:
+> SELECT md5('testing') from src limit 1;
+'ae2b1fca515949e5d54fb22b8ed95575'
+
+PREHOOK: query: SELECT
+  md5(null),
+  md5('www.mysql.com')
+FROM src LIMIT 1
+PREHOOK: type: QUERY
+PREHOOK: Input: default@src
+#### A masked pattern was here ####
+POSTHOOK: query: SELECT
+  md5(null),
+  md5('www.mysql.com')
+FROM src LIMIT 1
+POSTHOOK: type: QUERY
+POSTHOOK: Input: default@src
+#### A masked pattern was here ####
+NULL	c2268fbe786c2718cd5c4d26ce09cb26
