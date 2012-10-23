@@ -46,8 +46,6 @@ public class UDFD2d extends UDF {
             Date d = new SimpleDateFormat("yyyy" + sourceSep + "MM" + sourceSep + "dd").parse(s);
             return new SimpleDateFormat("yyyy" + targetSep + "MM" + targetSep + "dd").format(d);
         } catch(Exception ex) {
-            System.out.println("d2d Exception");
-            System.exit(1);
         }
         return null;
     }
