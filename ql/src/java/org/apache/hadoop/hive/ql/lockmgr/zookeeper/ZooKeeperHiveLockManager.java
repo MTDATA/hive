@@ -306,6 +306,7 @@ public class ZooKeeperHiveLockManager implements HiveLockManager {
         }
         tryNum++;
       } catch (Exception e1) {
+        tryNum++;
         if (e1 instanceof KeeperException) {
           KeeperException e = (KeeperException) e1;
           switch (e.code()) {
