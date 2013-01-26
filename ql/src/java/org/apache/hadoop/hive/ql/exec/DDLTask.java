@@ -3719,6 +3719,10 @@ public class DDLTask extends Task<DDLWork> implements Serializable {
       String targetTableName = crtTbl.getTableName();
       tbl=db.newTable(targetTableName);
 
+      if (crtTbl.getTblProps() != null) {
+        tbl.getTTable().getParameters().putAll(crtTbl.getTblProps());
+      }
+
       tbl.setTableType(TableType.MANAGED_TABLE);
 
       if (crtTbl.isExternal()) {
@@ -3778,6 +3782,10 @@ public class DDLTask extends Task<DDLWork> implements Serializable {
         params.keySet().retainAll(paramsList);
       } else {
         params.clear();
+      }
+
+      if (crtTbl.getTblProps() != null) {
+        params.putAll(crtTbl.getTblProps());
       }
 
       if (crtTbl.isExternal()) {
