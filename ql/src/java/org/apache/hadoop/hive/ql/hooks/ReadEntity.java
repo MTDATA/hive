@@ -20,6 +20,7 @@ package org.apache.hadoop.hive.ql.hooks;
 
 import java.io.Serializable;
 
+import org.apache.hadoop.hive.metastore.api.Database;
 import org.apache.hadoop.hive.ql.metadata.Partition;
 import org.apache.hadoop.hive.ql.metadata.Table;
 
@@ -36,6 +37,9 @@ public class ReadEntity extends Entity implements Serializable {
     super();
   }
 
+  public ReadEntity(Database db) {
+    super(db);
+  }
   /**
    * Constructor.
    *

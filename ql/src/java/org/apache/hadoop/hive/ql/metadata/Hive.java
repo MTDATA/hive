@@ -1106,9 +1106,22 @@ public class Hive {
    * @throws HiveException
    */
   public Database getDatabase(String dbName) throws HiveException {
+    return this.getDatabase(dbName, false);
+  }
+
+  /**
+   * Get the database by name.
+   * @param dbName the name of the database.
+   * @return a Database object if this database exists, null otherwise.
+   * @throws HiveException
+   */
+  public Database getDatabase(String dbName, boolean throwException) throws HiveException {
     try {
       return getMSC().getDatabase(dbName);
     } catch (NoSuchObjectException e) {
+      if (throwException) {
+        throw new InvalidDatabaseException("Database " + dbName + " not found ", dbName);
+      }
       return null;
     } catch (Exception e) {
       throw new HiveException(e);
