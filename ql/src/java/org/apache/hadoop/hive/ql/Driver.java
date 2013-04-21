@@ -1336,7 +1336,14 @@ public class Driver implements CommandProcessor {
     }
     if (tsk.isMapRedTask() && !(tsk instanceof ConditionalTask)) {
       if (noName) {
-        conf.setVar(HiveConf.ConfVars.HADOOPJOBNAME, jobname + "(" + tsk.getId() + ")");
+        String jobNamePrefix = conf.getVar(HiveConf.ConfVars.HADOOPJOBNAMEPREFIX);
+        jobNamePrefix = StringUtils.isEmpty(jobNamePrefix)? "" : "(" + jobNamePrefix + ")";
+        if (StringUtils.isEmpty(jobNamePrefix)) {
+          jobname = jobname + "(" + tsk.getId() + ")";
+        } else {
+          jobname = jobNamePrefix + " (" + tsk.getId() + ")";
+        }
+        conf.setVar(HiveConf.ConfVars.HADOOPJOBNAME, jobname);
       }
       conf.set("mapreduce.workflow.node.name", tsk.getId());
       Utilities.setWorkflowAdjacencies(conf, plan);
