@@ -235,6 +235,7 @@ public class HiveConf extends Configuration {
     // number of reducers.
     HADOOPNUMREDUCERS("mapred.reduce.tasks", -1),
     HADOOPJOBNAME("mapred.job.name", null),
+    HADOOPJOBNAMEPREFIX("mapred.job.name.prefix", null),
     HADOOPSPECULATIVEEXECREDUCERS("mapred.reduce.tasks.speculative.execution", true),
 
     // Metastore stuff. Be sure to update HiveConf.metaVars when you add
