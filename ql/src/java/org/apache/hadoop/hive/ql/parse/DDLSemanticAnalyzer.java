@@ -3031,7 +3031,7 @@ public class DDLSemanticAnalyzer extends BaseSemanticAnalyzer {
   }
 
   private Table getTable(String tblName, boolean throwException) throws SemanticException {
-    return getTable(db.getCurrentDatabase(), tblName, throwException);
+    return getTable(null, tblName, throwException);
   }
 
   private Table getTable(String database, String tblName, boolean throwException)

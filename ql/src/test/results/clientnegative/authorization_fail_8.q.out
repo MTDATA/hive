@@ -1,0 +1,14 @@
+PREHOOK: query: create table src_authorization_8 (key1 int, value1 string)
+PREHOOK: type: CREATETABLE
+POSTHOOK: query: create table src_authorization_8 (key1 int, value1 string)
+POSTHOOK: type: CREATETABLE
+POSTHOOK: Output: default@src_authorization_8
+PREHOOK: query: desc src_authorization_8
+PREHOOK: type: DESCTABLE
+POSTHOOK: query: desc src_authorization_8
+POSTHOOK: type: DESCTABLE
+# col_name            	data_type           	comment             
+	 	 
+key1                	int                 	None                
+value1              	string              	None                
+Authorization failed:No privilege 'Drop' found for outputs { database:default, table:src_authorization_8}. Use show grant to get more details.
