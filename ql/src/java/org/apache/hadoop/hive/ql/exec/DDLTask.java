@@ -1883,7 +1883,7 @@ public class DDLTask extends Task<DDLWork> implements Serializable {
 
       if (tbl.isView()) {
         String createTab_stmt = "CREATE VIEW " + tableName + " AS " + tbl.getViewExpandedText();
-        outStream.writeBytes(createTab_stmt.toString());
+        outStream.write(createTab_stmt.toString().getBytes("UTF-8"));
         ((FSDataOutputStream) outStream).close();
         outStream = null;
         return 0;
@@ -2065,7 +2065,7 @@ public class DDLTask extends Task<DDLWork> implements Serializable {
       createTab_stmt.setAttribute(TBL_LOCATION, tbl_location);
       createTab_stmt.setAttribute(TBL_PROPERTIES, tbl_properties);
 
-      outStream.writeBytes(createTab_stmt.toString());
+      outStream.write(createTab_stmt.toString().getBytes("UTF-8"));
       ((FSDataOutputStream) outStream).close();
       outStream = null;
     } catch (FileNotFoundException e) {
