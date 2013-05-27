@@ -19,13 +19,14 @@
 package org.apache.hadoop.hive.ql.metadata.formatting;
 
 import java.io.DataOutputStream;
-import java.io.OutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileStatus;
@@ -128,17 +129,17 @@ public class TextMetaDataFormatter implements MetaDataFormatter {
        try {
          if (colPath.equals(tableName)) {
            if (!isFormatted) {
-             outStream.writeBytes(MetaDataFormatUtils.displayColsUnformatted(cols));
+             outStream.write(MetaDataFormatUtils.displayColsUnformatted(cols).getBytes("UTF-8"));
            } else {
-             outStream.writeBytes(
+             outStream.write(
                MetaDataFormatUtils.getAllColumnsInformation(cols,
-                 tbl.isPartitioned() ? tbl.getPartCols() : null));
+                 tbl.isPartitioned() ? tbl.getPartCols() : null).getBytes("UTF-8"));
            }
          } else {
            if (isFormatted) {
-             outStream.writeBytes(MetaDataFormatUtils.getAllColumnsInformation(cols));
+             outStream.write(MetaDataFormatUtils.getAllColumnsInformation(cols).getBytes("UTF-8"));
            } else {
-             outStream.writeBytes(MetaDataFormatUtils.displayColsUnformatted(cols));
+             outStream.write(MetaDataFormatUtils.displayColsUnformatted(cols).getBytes("UTF-8"));
            }
          }
 
@@ -146,9 +147,9 @@ public class TextMetaDataFormatter implements MetaDataFormatter {
 
            if (isFormatted) {
              if (part != null) {
-               outStream.writeBytes(MetaDataFormatUtils.getPartitionInformation(part));
+               outStream.write(MetaDataFormatUtils.getPartitionInformation(part).getBytes("UTF-8"));
              } else {
-               outStream.writeBytes(MetaDataFormatUtils.getTableInformation(tbl));
+               outStream.write(MetaDataFormatUtils.getTableInformation(tbl).getBytes("UTF-8"));
              }
            }
 
@@ -160,7 +161,7 @@ public class TextMetaDataFormatter implements MetaDataFormatter {
                // show partition information
                outStream.writeBytes("Detailed Partition Information");
                outStream.write(separator);
-               outStream.writeBytes(part.getTPartition().toString());
+               outStream.write(part.getTPartition().toString().getBytes("UTF-8"));
                outStream.write(separator);
                // comment column is empty
                outStream.write(terminator);
@@ -168,7 +169,7 @@ public class TextMetaDataFormatter implements MetaDataFormatter {
                // show table information
                outStream.writeBytes("Detailed Table Information");
                outStream.write(separator);
-               outStream.writeBytes(tbl.getTTable().toString());
+               outStream.write(tbl.getTTable().toString().getBytes("UTF-8"));
                outStream.write(separator);
                outStream.write(terminator);
              }
@@ -441,11 +442,13 @@ public class TextMetaDataFormatter implements MetaDataFormatter {
         try {
             outStream.writeBytes(database);
             outStream.write(separator);
-            if (comment != null)
-                outStream.writeBytes(comment);
+            if (comment != null) {
+              outStream.writeBytes(comment);
+            }
             outStream.write(separator);
-            if (location != null)
-                outStream.writeBytes(location);
+            if (location != null) {
+              outStream.writeBytes(location);
+            }
             outStream.write(separator);
             if (params != null && !params.isEmpty()) {
                 outStream.writeBytes(params.toString());
