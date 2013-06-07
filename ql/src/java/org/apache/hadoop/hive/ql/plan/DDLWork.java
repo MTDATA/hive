@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.hadoop.hive.ql.plan;
 
 import java.io.Serializable;
@@ -45,12 +44,15 @@ public class DDLWork implements Serializable {
   private AlterIndexDesc alterIdxDesc;
   private ShowDatabasesDesc showDatabasesDesc;
   private ShowTablesDesc showTblsDesc;
+  private ShowColumnsDesc showColumnsDesc;
+  private ShowTblPropertiesDesc showTblPropertiesDesc;
   private LockTableDesc lockTblDesc;
   private UnlockTableDesc unlockTblDesc;
   private ShowFunctionsDesc showFuncsDesc;
   private ShowLocksDesc showLocksDesc;
   private DescFunctionDesc descFunctionDesc;
   private ShowPartitionsDesc showPartsDesc;
+  private ShowCreateTableDesc showCreateTblDesc;
   private DescTableDesc descTblDesc;
   private AddPartitionDesc addPartitionDesc;
   private RenamePartitionDesc renamePartitionDesc;
@@ -243,6 +245,16 @@ public class DDLWork implements Serializable {
   }
 
   /**
+   * @param showColumnsDesc
+   */
+  public DDLWork(HashSet<ReadEntity> inputs, HashSet<WriteEntity> outputs,
+      ShowColumnsDesc showColumnsDesc) {
+    this(inputs, outputs);
+
+    this.showColumnsDesc = showColumnsDesc;
+  }
+
+  /**
    * @param lockTblDesc
    */
   public DDLWork(HashSet<ReadEntity> inputs, HashSet<WriteEntity> outputs,
@@ -303,6 +315,16 @@ public class DDLWork implements Serializable {
   }
 
   /**
+   * @param showCreateTblDesc
+   */
+  public DDLWork(HashSet<ReadEntity> inputs, HashSet<WriteEntity> outputs,
+      ShowCreateTableDesc showCreateTblDesc) {
+    this(inputs, outputs);
+
+    this.showCreateTblDesc = showCreateTblDesc;
+  }
+
+  /**
    * @param addPartitionDesc
    *          information about the partitions we want to add.
    */
@@ -352,6 +374,17 @@ public class DDLWork implements Serializable {
     this(inputs, outputs);
 
     this.showTblStatusDesc = showTblStatusDesc;
+  }
+
+  /**
+   * @param showTblPropertiesDesc
+   *          show table properties descriptor
+   */
+  public DDLWork(HashSet<ReadEntity> inputs, HashSet<WriteEntity> outputs,
+      ShowTblPropertiesDesc showTblPropertiesDesc) {
+    this(inputs, outputs);
+
+    this.showTblPropertiesDesc = showTblPropertiesDesc;
   }
 
   public DDLWork(HashSet<ReadEntity> inputs, HashSet<WriteEntity> outputs,
@@ -590,6 +623,22 @@ public class DDLWork implements Serializable {
   }
 
   /**
+   * @return the showColumnsDesc
+   */
+  @Explain(displayName = "Show Columns Operator")
+  public ShowColumnsDesc getShowColumnsDesc() {
+    return showColumnsDesc;
+  }
+
+  /**
+   * @param showColumnsDesc
+   *          the showColumnsDesc to set
+   */
+  public void setShowColumnsDesc(ShowColumnsDesc showColumnsDesc) {
+    this.showColumnsDesc = showColumnsDesc;
+  }
+
+  /**
    * @return the showFuncsDesc
    */
   @Explain(displayName = "Show Function Operator")
@@ -683,6 +732,22 @@ public class DDLWork implements Serializable {
    */
   public void setShowPartsDesc(ShowPartitionsDesc showPartsDesc) {
     this.showPartsDesc = showPartsDesc;
+  }
+
+  /**
+   * @return the showCreateTblDesc
+   */
+  @Explain(displayName = "Show Create Table Operator")
+  public ShowCreateTableDesc getShowCreateTblDesc() {
+    return showCreateTblDesc;
+  }
+
+  /**
+   * @param showCreateTblDesc
+   *          the showCreateTblDesc to set
+   */
+  public void setShowCreateTblDesc(ShowCreateTableDesc showCreateTblDesc) {
+    this.showCreateTblDesc = showCreateTblDesc;
   }
 
   /**
@@ -786,6 +851,14 @@ public class DDLWork implements Serializable {
    */
   public void setShowTblStatusDesc(ShowTableStatusDesc showTblStatusDesc) {
     this.showTblStatusDesc = showTblStatusDesc;
+  }
+
+  public ShowTblPropertiesDesc getShowTblPropertiesDesc() {
+    return showTblPropertiesDesc;
+  }
+
+  public void setShowTblPropertiesDesc(ShowTblPropertiesDesc showTblPropertiesDesc) {
+    this.showTblPropertiesDesc = showTblPropertiesDesc;
   }
 
   public CreateViewDesc getCreateVwDesc() {

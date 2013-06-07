@@ -50,6 +50,7 @@ import org.apache.hadoop.hive.metastore.api.MetaException;
 import org.apache.hadoop.hive.metastore.api.Order;
 import org.apache.hadoop.hive.metastore.api.PrincipalType;
 import org.apache.hadoop.hive.ql.Driver;
+import org.apache.hadoop.hive.ql.ErrorMsg;
 import org.apache.hadoop.hive.ql.exec.ArchiveUtils;
 import org.apache.hadoop.hive.ql.exec.FetchTask;
 import org.apache.hadoop.hive.ql.exec.Task;
@@ -97,6 +98,8 @@ import org.apache.hadoop.hive.ql.plan.PrivilegeObjectDesc;
 import org.apache.hadoop.hive.ql.plan.RenamePartitionDesc;
 import org.apache.hadoop.hive.ql.plan.RevokeDesc;
 import org.apache.hadoop.hive.ql.plan.RoleDDLDesc;
+import org.apache.hadoop.hive.ql.plan.ShowColumnsDesc;
+import org.apache.hadoop.hive.ql.plan.ShowCreateTableDesc;
 import org.apache.hadoop.hive.ql.plan.ShowDatabasesDesc;
 import org.apache.hadoop.hive.ql.plan.ShowFunctionsDesc;
 import org.apache.hadoop.hive.ql.plan.ShowGrantDesc;
@@ -105,6 +108,7 @@ import org.apache.hadoop.hive.ql.plan.ShowLocksDesc;
 import org.apache.hadoop.hive.ql.plan.ShowPartitionsDesc;
 import org.apache.hadoop.hive.ql.plan.ShowTableStatusDesc;
 import org.apache.hadoop.hive.ql.plan.ShowTablesDesc;
+import org.apache.hadoop.hive.ql.plan.ShowTblPropertiesDesc;
 import org.apache.hadoop.hive.ql.plan.StatsWork;
 import org.apache.hadoop.hive.ql.plan.SwitchDatabaseDesc;
 import org.apache.hadoop.hive.ql.plan.TableDesc;
@@ -227,9 +231,17 @@ public class DDLSemanticAnalyzer extends BaseSemanticAnalyzer {
       ctx.setResFile(new Path(ctx.getLocalTmpFileURI()));
       analyzeShowTables(ast);
       break;
+    case HiveParser.TOK_SHOWCOLUMNS:
+      ctx.setResFile(new Path(ctx.getLocalTmpFileURI()));
+      analyzeShowColumns(ast);
+      break;
     case HiveParser.TOK_SHOW_TABLESTATUS:
       ctx.setResFile(new Path(ctx.getLocalTmpFileURI()));
       analyzeShowTableStatus(ast);
+      break;
+    case HiveParser.TOK_SHOW_TBLPROPERTIES:
+      ctx.setResFile(new Path(ctx.getLocalTmpFileURI()));
+      analyzeShowTableProperties(ast);
       break;
     case HiveParser.TOK_SHOWFUNCTIONS:
       ctx.setResFile(new Path(ctx.getLocalTmpFileURI()));
@@ -314,6 +326,10 @@ public class DDLSemanticAnalyzer extends BaseSemanticAnalyzer {
     case HiveParser.TOK_SHOWPARTITIONS:
       ctx.setResFile(new Path(ctx.getLocalTmpFileURI()));
       analyzeShowPartitions(ast);
+      break;
+    case HiveParser.TOK_SHOW_CREATETABLE:
+      ctx.setResFile(new Path(ctx.getLocalTmpFileURI()));
+      analyzeShowCreateTable(ast);
       break;
     case HiveParser.TOK_SHOWINDEXES:
       ctx.setResFile(new Path(ctx.getLocalTmpFileURI()));
@@ -1407,6 +1423,27 @@ public class DDLSemanticAnalyzer extends BaseSemanticAnalyzer {
     setFetchTask(createFetchTask(showPartsDesc.getSchema()));
   }
 
+  private void analyzeShowCreateTable(ASTNode ast) throws SemanticException {
+    ShowCreateTableDesc showCreateTblDesc;
+    String tableName = getUnescapedName((ASTNode)ast.getChild(0));
+    showCreateTblDesc = new ShowCreateTableDesc(tableName, ctx.getResFile().toString());
+    try {
+      Table tab = db.getTable(tableName, true);
+      if (tab.getTableType() == org.apache.hadoop.hive.metastore.TableType.INDEX_TABLE) {
+        throw new SemanticException(ErrorMsg.SHOW_CREATETABLE_INDEX.getMsg(tableName
+            + " has table type INDEX_TABLE"));
+      }
+      inputs.add(new ReadEntity(tab));
+    } catch (SemanticException e) {
+      throw e;
+    } catch (HiveException e) {
+      throw new SemanticException(ErrorMsg.INVALID_TABLE.getMsg(tableName));
+    }
+    rootTasks.add(TaskFactory.get(new DDLWork(getInputs(), getOutputs(),
+        showCreateTblDesc), conf));
+    setFetchTask(createFetchTask(showCreateTblDesc.getSchema()));
+  }
+
   private void analyzeShowDatabases(ASTNode ast) throws SemanticException {
     ShowDatabasesDesc showDatabasesDesc;
     if (ast.getChildCount() == 1) {
@@ -1454,6 +1491,41 @@ public class DDLSemanticAnalyzer extends BaseSemanticAnalyzer {
     setFetchTask(createFetchTask(showTblsDesc.getSchema()));
   }
 
+  private void analyzeShowColumns(ASTNode ast) throws SemanticException {
+    ShowColumnsDesc showColumnsDesc;
+    String dbName = null;
+    String tableName = null;
+    switch (ast.getChildCount()) {
+      case 1:
+        tableName = getUnescapedName((ASTNode)ast.getChild(0));
+        break;
+      case 2:
+        dbName = getUnescapedName((ASTNode)ast.getChild(0));
+        tableName = getUnescapedName((ASTNode)ast.getChild(1));
+        break;
+      default:
+        break;
+    }
+
+    try {
+      Table tab = null;
+      if (dbName == null) {
+        tab = db.getTable(tableName, true);
+      }
+      else {
+        tab = db.getTable(dbName, tableName, true);
+      }
+      inputs.add(new ReadEntity(tab));
+    } catch (HiveException e) {
+      throw new SemanticException(ErrorMsg.INVALID_TABLE.getMsg(tableName));
+    }
+
+    showColumnsDesc = new ShowColumnsDesc(ctx.getResFile(), dbName, tableName);
+    rootTasks.add(TaskFactory.get(new DDLWork(getInputs(), getOutputs(),
+                                              showColumnsDesc), conf));
+    setFetchTask(createFetchTask(showColumnsDesc.getSchema()));
+  }
+
   private void analyzeShowTableStatus(ASTNode ast) throws SemanticException {
     ShowTableStatusDesc showTblStatusDesc;
     String tableNames = getUnescapedName((ASTNode)ast.getChild(0));
@@ -1480,6 +1552,21 @@ public class DDLSemanticAnalyzer extends BaseSemanticAnalyzer {
     rootTasks.add(TaskFactory.get(new DDLWork(getInputs(), getOutputs(),
         showTblStatusDesc), conf));
     setFetchTask(createFetchTask(showTblStatusDesc.getSchema()));
+  }
+
+  private void analyzeShowTableProperties(ASTNode ast) throws SemanticException {
+    ShowTblPropertiesDesc showTblPropertiesDesc;
+    String tableNames = getUnescapedName((ASTNode)ast.getChild(0));
+    String dbName = db.getCurrentDatabase();
+    String propertyName = null;
+    if (ast.getChildCount() > 1) {
+      propertyName = unescapeSQLString(ast.getChild(1).getText());
+    }
+    showTblPropertiesDesc = new ShowTblPropertiesDesc(ctx.getResFile().toString(), tableNames,
+        propertyName);
+    rootTasks.add(TaskFactory.get(new DDLWork(getInputs(), getOutputs(),
+        showTblPropertiesDesc), conf));
+    setFetchTask(createFetchTask(showTblPropertiesDesc.getSchema()));
   }
 
   private void analyzeShowIndexes(ASTNode ast) throws SemanticException {
