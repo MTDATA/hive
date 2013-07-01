@@ -271,7 +271,7 @@ public class JoinUtil {
   protected static Long isFiltered(Object row, List<ExprNodeEvaluator> filters,
       List<ObjectInspector> ois, int[] filterMap) throws HiveException {
     // apply join filters on the row.
-    Long ret = 0;
+    Long ret = 0L;
     int j = 0;
     for (int i = 0; i < filterMap.length; i += 2) {
       int tag = filterMap[i];

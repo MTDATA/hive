@@ -271,11 +271,11 @@ public abstract class CommonJoinOperator<T extends JoinDesc> extends
         new HashMap<Byte, List<ObjectInspector>>();
       for (Byte alias : order) {
         ArrayList<ObjectInspector> rcOIs = new ArrayList<ObjectInspector>();
-        rcOIs.addAll(joinValuesObjectInspectors[alias]);
+        rcOIs.addAll(joinValuesObjectInspectors.get(alias));
         // for each alias, add object inspector for long as the last element
         rcOIs.add(
             PrimitiveObjectInspectorFactory.writableLongObjectInspector);
-        rowContainerObjectInspectors[alias] = rcOIs;
+        rowContainerObjectInspectors.put(alias, rcOIs);
       }
       rowContainerStandardObjectInspectors =
         JoinUtil.getStandardObjectInspectors(rowContainerObjectInspectors,NOTSKIPBIGTABLE);
@@ -319,9 +319,9 @@ public abstract class CommonJoinOperator<T extends JoinDesc> extends
       // if serde is null, the input doesn't need to be spilled out
       // e.g., the output columns does not contains the input table
       RowContainer rc = JoinUtil.getRowContainer(hconf,
-          rowContainerStandardObjectInspectors[pos],
+          rowContainerStandardObjectInspectors.get(pos),
           alias, joinCacheSize, spillTableDesc, conf, !hasFilter(pos), reporter);
-      storage[pos] = rc;
+      storage.put(pos, rc);
 
       pos++;
     }
@@ -855,7 +855,7 @@ transient boolean newGroupStarted = false;
 
   // returns filter result of left object by filters associated with right alias
   private boolean isLeftFiltered(int left, int right, List<Object> leftObj) {
-    if (joinValues[order[left]].size() < leftObj.size()) {
+    if (joinValues.get(order[left]).size() < leftObj.size()) {
       LongWritable filter = (LongWritable) leftObj.get(leftObj.size() - 1);
       return JoinUtil.isFiltered(filter.get(), right);
     }
@@ -864,7 +864,7 @@ transient boolean newGroupStarted = false;
 
   // returns filter result of right object by filters associated with left alias
   private boolean isRightFiltered(int left, int right, List<Object> rightObj) {
-    if (joinValues[order[right]].size() < rightObj.size()) {
+    if (joinValues.get(order[right]).size() < rightObj.size()) {
       LongWritable filter = (LongWritable) rightObj.get(rightObj.size() - 1);
       return JoinUtil.isFiltered(filter.get(), left);
     }
