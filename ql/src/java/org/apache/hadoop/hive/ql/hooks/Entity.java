@@ -22,7 +22,6 @@ import java.io.Serializable;
 import java.net.URI;
 import java.util.Map;
 
-import org.apache.hadoop.hive.metastore.api.Database;
 import org.apache.hadoop.hive.ql.metadata.Partition;
 import org.apache.hadoop.hive.ql.metadata.DummyPartition;
 import org.apache.hadoop.hive.ql.metadata.Table;
@@ -41,18 +40,13 @@ public class Entity implements Serializable {
    * The type of the entity.
    */
   public static enum Type {
-    TABLE, PARTITION, DUMMYPARTITION, DFS_DIR, LOCAL_DIR, DATABASE
+    TABLE, PARTITION, DUMMYPARTITION, DFS_DIR, LOCAL_DIR
   };
 
   /**
    * The type.
    */
   private Type typ;
-
-  /**
-   * The database. This is null if this object is not a database.
-   */
-  private Database db;
 
   /**
    * The table. This is null if this is a directory.
@@ -129,32 +123,10 @@ public class Entity implements Serializable {
     this.d = d;
   }
 
-  public Database getDb() {
-    return db;
-  }
-
-  public void setDb(Database db) {
-    this.db = db;
-  }
-
   /**
    * Only used by serialization.
    */
   public Entity() {
-  }
-
-  public Entity(Database db) {
-    this(db, true);
-  }
-
-  public Entity(Database db, boolean complete) {
-    this.db = db;
-    d = null;
-    p = null;
-    t = null;
-    typ = Type.DATABASE;
-    name = computeName();
-    this.complete = complete;
   }
 
   /**
@@ -168,7 +140,6 @@ public class Entity implements Serializable {
   }
 
   public Entity(Table t, boolean complete) {
-    db = null;
     d = null;
     p = null;
     this.t = t;
@@ -188,7 +159,6 @@ public class Entity implements Serializable {
   }
 
   public Entity(Partition p, boolean complete) {
-    db = null;
     d = null;
     this.p = p;
     t = p.getTable();
@@ -198,7 +168,6 @@ public class Entity implements Serializable {
   }
 
   public Entity(DummyPartition p, boolean complete) {
-    db = null;
     d = null;
     this.p = p;
     t = p.getTable();
@@ -220,7 +189,6 @@ public class Entity implements Serializable {
   }
 
   public Entity(String d, boolean islocal, boolean complete) {
-    db = null;
     this.d = d;
     p = null;
     t = null;
@@ -255,8 +223,6 @@ public class Entity implements Serializable {
    * Get the location of the entity.
    */
   public URI getLocation() throws Exception {
-    if (typ == Type.DATABASE) {
-    }
     if (typ == Type.TABLE) {
       return t.getDataLocation();
     }
@@ -286,10 +252,6 @@ public class Entity implements Serializable {
     return t;
   }
 
-  public Database getDatabase() {
-    return db;
-  }
-
   /**
    * toString function.
    */
@@ -300,8 +262,6 @@ public class Entity implements Serializable {
 
   private String computeName() {
     switch (typ) {
-    case DATABASE:
-      return db.getName();
     case TABLE:
       return t.getDbName() + "@" + t.getTableName();
     case PARTITION:

@@ -43,7 +43,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.common.JavaUtils;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.MetaStoreUtils;
-import org.apache.hadoop.hive.metastore.api.Database;
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.metastore.api.Schema;
 import org.apache.hadoop.hive.ql.exec.ConditionalTask;
@@ -535,14 +534,6 @@ public class Driver implements CommandProcessor {
       }
       if (outputs != null && outputs.size() > 0) {
         for (WriteEntity write : outputs) {
-
-          if (write.getType() == WriteEntity.Type.DATABASE) {
-            Database database = write.getDatabase();
-            if (database != null) {
-              ss.getAuthorizer().authorize(database, null, op.getOutputRequiredPrivileges());
-              continue;
-            }
-          }
 
           if (write.getType() == WriteEntity.Type.PARTITION) {
             Partition part = db.getPartition(write.getTable(), write

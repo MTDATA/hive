@@ -49,7 +49,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.conf.HiveConf.ConfVars;
 import org.apache.hadoop.hive.metastore.Warehouse;
-import org.apache.hadoop.hive.metastore.api.Database;
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.metastore.api.Index;
 import org.apache.hadoop.hive.metastore.api.MetaException;
@@ -703,19 +702,6 @@ public class DDLSemanticAnalyzer extends BaseSemanticAnalyzer {
 
     if (null != ast.getFirstChildWithType(HiveParser.TOK_CASCADE)) {
       ifCascade = true;
-    }
-
-    boolean throwException =
-            !ifExists && !HiveConf.getBoolVar(conf, ConfVars.DROPIGNORESNONEXISTENT);
-
-    try {
-      Database database = db.getDatabase(dbName, throwException);
-      if (database != null) {
-//        inputs.add(new ReadEntity(database));
-        outputs.add(new WriteEntity(database));
-      }
-    } catch (HiveException e) {
-      throw new SemanticException(ErrorMsg.DATABASE_NOT_EXISTS.getMsg(dbName));
     }
 
     DropDatabaseDesc dropDatabaseDesc = new DropDatabaseDesc(dbName, ifExists, ifCascade);

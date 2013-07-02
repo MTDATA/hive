@@ -211,7 +211,7 @@ public class HiveConf extends Configuration {
     // run in local mode only if number of tasks (for map and reduce each) is
     // less than this
     LOCALMODEMAXINPUTFILES("hive.exec.mode.local.auto.input.files.max", 4),
-    // if true, DROP DATABASE/TABLE/VIEW does not fail if table/view doesn't exist and IF EXISTS is
+    // if true, DROP TABLE/VIEW does not fail if table/view doesn't exist and IF EXISTS is
     // not specified
     DROPIGNORESNONEXISTENT("hive.exec.drop.ignorenonexistent", true),
 
