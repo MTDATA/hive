@@ -21,4 +21,4 @@ org.apache.hadoop.hive.ql.metadata.HiveException: [Error 20003]: An error occurr
 #### A masked pattern was here ####
 Ended Job = job_local_0001 with errors
 Error during job, obtaining debugging information...
-FAILED: Execution Error, return code 2 from org.apache.hadoop.hive.ql.exec.MapRedTask
+FAILED: Execution Error, return code 2 from org.apache.hadoop.hive.ql.exec.mr.MapRedTask
