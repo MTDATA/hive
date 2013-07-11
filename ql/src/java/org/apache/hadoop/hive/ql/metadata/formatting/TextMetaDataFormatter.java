@@ -139,24 +139,24 @@ public class TextMetaDataFormatter implements MetaDataFormatter {
         try {
           if (colPath.equals(tableName)) {
             List<FieldSchema> partCols = tbl.isPartitioned() ? tbl.getPartCols() : null;
-            outStream.writeBytes(
+            outStream.write(
               isPretty ?
                   MetaDataPrettyFormatUtils.getAllColumnsInformation(
-                      cols, partCols, prettyOutputNumCols)
+                      cols, partCols, prettyOutputNumCols).getBytes("UTF-8")
                 :
-                  MetaDataFormatUtils.getAllColumnsInformation(cols, partCols, isFormatted)
+                  MetaDataFormatUtils.getAllColumnsInformation(cols, partCols, isFormatted).getBytes("UTF-8")
               );
           } else {
-            outStream.writeBytes(
-                MetaDataFormatUtils.getAllColumnsInformation(cols, isFormatted));
+            outStream.write(
+                MetaDataFormatUtils.getAllColumnsInformation(cols, isFormatted).getBytes("UTF-8"));
           }
 
           if (tableName.equals(colPath)) {
             if (isFormatted) {
               if (part != null) {
-                outStream.writeBytes(MetaDataFormatUtils.getPartitionInformation(part));
+                outStream.write(MetaDataFormatUtils.getPartitionInformation(part).getBytes("UTF-8"));
               } else {
-                outStream.writeBytes(MetaDataFormatUtils.getTableInformation(tbl));
+                outStream.write(MetaDataFormatUtils.getTableInformation(tbl).getBytes("UTF-8"));
               }
             }
 
@@ -168,7 +168,7 @@ public class TextMetaDataFormatter implements MetaDataFormatter {
                 // show partition information
                 outStream.writeBytes("Detailed Partition Information");
                 outStream.write(separator);
-                outStream.writeBytes(part.getTPartition().toString());
+                outStream.write(part.getTPartition().toString().getBytes("UTF-8"));
                 outStream.write(separator);
                 // comment column is empty
                 outStream.write(terminator);
@@ -176,7 +176,7 @@ public class TextMetaDataFormatter implements MetaDataFormatter {
                 // show table information
                 outStream.writeBytes("Detailed Table Information");
                 outStream.write(separator);
-                outStream.writeBytes(tbl.getTTable().toString());
+                outStream.write(tbl.getTTable().toString().getBytes("UTF-8"));
                 outStream.write(separator);
                 outStream.write(terminator);
               }
