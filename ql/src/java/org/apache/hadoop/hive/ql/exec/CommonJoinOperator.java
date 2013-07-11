@@ -42,6 +42,7 @@ import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspectorFactory;
 import org.apache.hadoop.hive.serde2.objectinspector.StructObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory;
+import org.apache.hadoop.io.LongWritable;
 
 /**
  * Join operator implementation.
@@ -271,9 +272,9 @@ public abstract class CommonJoinOperator<T extends JoinDesc> extends
       for (Byte alias : order) {
         ArrayList<ObjectInspector> rcOIs = new ArrayList<ObjectInspector>();
         rcOIs.addAll(joinValuesObjectInspectors[alias]);
-        // for each alias, add object inspector for short as the last element
+        // for each alias, add object inspector for long as the last element
         rcOIs.add(
-            PrimitiveObjectInspectorFactory.writableShortObjectInspector);
+            PrimitiveObjectInspectorFactory.writableLongObjectInspector);
         rowContainerObjectInspectors[alias] = rcOIs;
       }
       rowContainerStandardObjectInspectors =
@@ -304,7 +305,7 @@ public abstract class CommonJoinOperator<T extends JoinDesc> extends
         // add whether the row is filtered or not
         // this value does not matter for the dummyObj
         // because the join values are already null
-        nr.add(new ShortWritable());
+        nr.add(new LongWritable());
       }
       dummyObj[pos] = nr;
       // there should be only 1 dummy object in the RowContainer
@@ -855,7 +856,7 @@ transient boolean newGroupStarted = false;
   // returns filter result of left object by filters associated with right alias
   private boolean isLeftFiltered(int left, int right, List<Object> leftObj) {
     if (joinValues[order[left]].size() < leftObj.size()) {
-      ShortWritable filter = (ShortWritable) leftObj.get(leftObj.size() - 1);
+      LongWritable filter = (LongWritable) leftObj.get(leftObj.size() - 1);
       return JoinUtil.isFiltered(filter.get(), right);
     }
     return false;
@@ -864,7 +865,7 @@ transient boolean newGroupStarted = false;
   // returns filter result of right object by filters associated with left alias
   private boolean isRightFiltered(int left, int right, List<Object> rightObj) {
     if (joinValues[order[right]].size() < rightObj.size()) {
-      ShortWritable filter = (ShortWritable) rightObj.get(rightObj.size() - 1);
+      LongWritable filter = (LongWritable) rightObj.get(rightObj.size() - 1);
       return JoinUtil.isFiltered(filter.get(), left);
     }
     return false;
@@ -874,7 +875,7 @@ transient boolean newGroupStarted = false;
   private boolean hasAnyFiltered(int alias, List<Object> row) {
     return row == dummyObj[alias] ||
         hasFilter(alias) &&
-        JoinUtil.hasAnyFiltered(((ShortWritable) row.get(row.size() - 1)).get());
+        JoinUtil.hasAnyFiltered(((LongWritable) row.get(row.size() - 1)).get());
   }
 
   protected final boolean hasFilter(int alias) {

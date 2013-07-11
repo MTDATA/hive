@@ -49,6 +49,8 @@ import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.util.ReflectionUtils;
+import org.apache.hadoop.io.LongWritable;
+
 
 public class JoinUtil {
 
@@ -215,7 +217,7 @@ public class JoinUtil {
     if (filterMap != null) {
       nr = new Object[valueFields.size()+1];
       // add whether the row is filtered or not.
-      nr[valueFields.size()] = new ShortWritable(isFiltered(row, filters, filtersOI, filterMap));
+      nr[valueFields.size()] = new LongWritable(isFiltered(row, filters, filtersOI, filterMap));
     }else{
       nr = new Object[valueFields.size()];
     }
@@ -247,29 +249,29 @@ public class JoinUtil {
     }
     if (filterMap != null) {
       // add whether the row is filtered or not.
-      nr.add(new ShortWritable(isFiltered(row, filters, filtersOI, filterMap)));
+      nr.add(new LongWritable(isFiltered(row, filters, filtersOI, filterMap)));
     }
 
     return nr;
   }
 
-  private static final short[] MASKS;
+  private static final Long[] MASKS;
   static {
-    int num = 32;
-    MASKS = new short[num];
-    MASKS[0] = 1;
+    int num = 64;
+    MASKS = new Long[num];
+    MASKS[0] = 1L;
     for (int idx = 1; idx < num; idx++) {
-      MASKS[idx] = (short)(2 * MASKS[idx-1]);
+      MASKS[idx] = (Long)(2L * MASKS[idx-1]);
     }
   }
 
   /**
    * Returns true if the row does not pass through filters.
    */
-  protected static short isFiltered(Object row, List<ExprNodeEvaluator> filters,
+  protected static Long isFiltered(Object row, List<ExprNodeEvaluator> filters,
       List<ObjectInspector> ois, int[] filterMap) throws HiveException {
     // apply join filters on the row.
-    short ret = 0;
+    Long ret = 0L;
     int j = 0;
     for (int i = 0; i < filterMap.length; i += 2) {
       int tag = filterMap[i];
@@ -293,11 +295,11 @@ public class JoinUtil {
     return ret;
   }
 
-  protected static boolean isFiltered(short filter, int tag) {
+  protected static boolean isFiltered(Long filter, int tag) {
     return (filter & MASKS[tag]) != 0;
   }
 
-  protected static boolean hasAnyFiltered(short tag) {
+  protected static boolean hasAnyFiltered(Long tag) {
     return tag != 0;
   }
 
@@ -359,7 +361,7 @@ public class JoinUtil {
       if (!noFilter) {
         colNames.append("filtered");
         colNames.append(',');
-        colTypes.append(TypeInfoFactory.shortTypeInfo.getTypeName());
+        colTypes.append(TypeInfoFactory.longTypeInfo.getTypeName());
         colTypes.append(',');
       }
       // remove the last ','
