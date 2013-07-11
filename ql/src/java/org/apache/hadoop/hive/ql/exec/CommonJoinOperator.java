@@ -35,12 +35,13 @@ import org.apache.hadoop.hive.ql.metadata.HiveException;
 import org.apache.hadoop.hive.ql.plan.JoinCondDesc;
 import org.apache.hadoop.hive.ql.plan.JoinDesc;
 import org.apache.hadoop.hive.ql.plan.TableDesc;
-import org.apache.hadoop.hive.serde2.io.ShortWritable;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.hive.serde2.lazybinary.LazyBinarySerDe;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspectorFactory;
 import org.apache.hadoop.hive.serde2.objectinspector.StructObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory;
+import org.apache.hadoop.io.LongWritable;
 
 /**
  * Join operator implementation.
@@ -237,9 +238,9 @@ public abstract class CommonJoinOperator<T extends JoinDesc> extends
       for (Byte alias : order) {
         ArrayList<ObjectInspector> rcOIs = new ArrayList<ObjectInspector>();
         rcOIs.addAll(joinValuesObjectInspectors[alias]);
-        // for each alias, add object inspector for short as the last element
+        // for each alias, add object inspector for long as the last element
         rcOIs.add(
-            PrimitiveObjectInspectorFactory.writableShortObjectInspector);
+            PrimitiveObjectInspectorFactory.writableLongObjectInspector);
         rowContainerObjectInspectors[alias] = rcOIs;
       }
       rowContainerStandardObjectInspectors =
@@ -270,7 +271,7 @@ public abstract class CommonJoinOperator<T extends JoinDesc> extends
         // add whether the row is filtered or not
         // this value does not matter for the dummyObj
         // because the join values are already null
-        nr.add(new ShortWritable());
+        nr.add(new LongWritable());
       }
       dummyObj[pos] = nr;
       // there should be only 1 dummy object in the RowContainer
@@ -292,10 +293,10 @@ public abstract class CommonJoinOperator<T extends JoinDesc> extends
     }
 
     forwardCache = new Object[totalSz];
-    aliasFilterTags = new short[numAliases];
+    aliasFilterTags = new long[numAliases];
     Arrays.fill(aliasFilterTags, (byte)0xff);
 
-    filterTags = new short[numAliases];
+    filterTags = new long[numAliases];
     skipVectors = new boolean[numAliases][];
     for(int i = 0; i < skipVectors.length; i++) {
       skipVectors[i] = new boolean[i + 1];
@@ -358,7 +359,7 @@ public abstract class CommonJoinOperator<T extends JoinDesc> extends
   protected transient List[] intermediate;
 
   // filter tags for objects
-  protected transient short[] filterTags;
+  protected transient long[] filterTags;
 
   // ANDed value of all filter tags in current join group
   // if any of values passes on outer join alias (which makes zero for the tag alias),
@@ -380,7 +381,7 @@ public abstract class CommonJoinOperator<T extends JoinDesc> extends
   // result : 100, 10 + 100, 30 | 100, 20 + 100, 30 | 100, 30 + 100, 30 |
   //          N       + 100, 10 | N       + 100, 20
   //
-  protected transient short[] aliasFilterTags;
+  protected transient long[] aliasFilterTags;
 
   // all evaluation should be processed here for valid aliasFilterTags
   //
@@ -391,9 +392,9 @@ public abstract class CommonJoinOperator<T extends JoinDesc> extends
     ArrayList<Object> nr = JoinUtil.computeValues(row, joinValues[alias],
         joinValuesObjectInspectors[alias], hasFilter);
     if (hasFilter) {
-      short filterTag = JoinUtil.isFiltered(row, joinFilters[alias],
+      Long filterTag = JoinUtil.isFiltered(row, joinFilters[alias],
           joinFilterObjectInspectors[alias], filterMaps[alias]);
-      nr.add(new ShortWritable(filterTag));
+      nr.add(new LongWritable(filterTag));
       aliasFilterTags[alias] &= filterTag;
     }
     return nr;
@@ -602,8 +603,8 @@ public abstract class CommonJoinOperator<T extends JoinDesc> extends
   }
 
   // get tag value from object (last of list)
-  protected final short getFilterTag(List<Object> row) {
-    return ((ShortWritable) row.get(row.size() - 1)).get();
+  protected final long getFilterTag(List<Object> row) {
+    return ((LongWritable) row.get(row.size() - 1)).get();
   }
 
   /**

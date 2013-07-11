@@ -6785,8 +6785,8 @@ public class SemanticAnalyzer extends BaseSemanticAnalyzer {
         if (pos >= 0) {
           // for outer joins, it should not exceed 16 aliases (short type)
           if (!node.getNoOuterJoin() || !target.getNoOuterJoin()) {
-            if (node.getRightAliases().length + target.getRightAliases().length + 1 > 16) {
-              LOG.info(ErrorMsg.JOINNODE_OUTERJOIN_MORETHAN_16);
+            if (node.getRightAliases().length + target.getRightAliases().length + 1 > 64) {
+              LOG.info(ErrorMsg.JOINNODE_OUTERJOIN_MORETHAN_64);
               continue;
             }
           }
