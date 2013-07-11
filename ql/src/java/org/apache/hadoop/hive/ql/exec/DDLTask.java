@@ -1942,7 +1942,7 @@ public class DDLTask extends Task<DDLWork> implements Serializable {
 
       if (tbl.isView()) {
         String createTab_stmt = "CREATE VIEW " + tableName + " AS " + tbl.getViewExpandedText();
-        outStream.writeBytes(createTab_stmt.toString());
+        outStream.write(createTab_stmt.toString().getBytes("UTF-8"));
         ((FSDataOutputStream) outStream).close();
         outStream = null;
         return 0;
@@ -1972,7 +1972,7 @@ public class DDLTask extends Task<DDLWork> implements Serializable {
       List<FieldSchema> cols = tbl.getCols();
       List<String> columns = new ArrayList<String>();
       for (FieldSchema col : cols) {
-        String columnDesc = "  " + col.getName() + " " + col.getType();
+        String columnDesc = "  `" + col.getName() + "` " + col.getType();
         if (col.getComment() != null) {
           columnDesc = columnDesc + " COMMENT '" + escapeHiveCommand(col.getComment()) + "'";
         }
@@ -2124,7 +2124,7 @@ public class DDLTask extends Task<DDLWork> implements Serializable {
       createTab_stmt.add(TBL_LOCATION, tbl_location);
       createTab_stmt.add(TBL_PROPERTIES, tbl_properties);
 
-      outStream.writeBytes(createTab_stmt.render());
+      outStream.write(createTab_stmt.render().getBytes("UTF-8"));
       ((FSDataOutputStream) outStream).close();
       outStream = null;
     } catch (FileNotFoundException e) {
@@ -2179,7 +2179,7 @@ public class DDLTask extends Task<DDLWork> implements Serializable {
 
       for (Index index : indexes)
       {
-        outStream.writeBytes(MetaDataFormatUtils.getAllColumnsInformation(index));
+        outStream.write(MetaDataFormatUtils.getAllColumnsInformation(index).getBytes("UTF-8"));
       }
 
       ((FSDataOutputStream) outStream).close();
@@ -2323,8 +2323,8 @@ public class DDLTask extends Task<DDLWork> implements Serializable {
 
       List<FieldSchema> cols = table.getCols();
       cols.addAll(table.getPartCols());
-      outStream.writeBytes(
-          MetaDataFormatUtils.getAllColumnsInformation(cols, false));
+      outStream.write(
+          MetaDataFormatUtils.getAllColumnsInformation(cols, false).getBytes("UTF-8"));
       ((FSDataOutputStream) outStream).close();
       outStream = null;
     } catch (IOException e) {
