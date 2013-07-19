@@ -18,6 +18,7 @@
 
 package org.apache.hadoop.hive.ql.util;
 
+import org.apache.hadoop.hive.ql.udf.generic.MergeQueue;
 import org.apache.hadoop.hive.ql.udf.generic.NumDistinctValueEstimator;
 import org.apache.hadoop.hive.ql.udf.generic.NumericHistogram;
 
@@ -145,6 +146,15 @@ public enum JavaDataModel {
       length += array() * 3;                    // three array
       length += primitive1() * numVector * 2;   // two int array
       length += (object() + array() + primitive1() + primitive2()) * numVector;   // bitset array
+    }
+    return length;
+  }
+
+  public <T extends Comparable> int lengthFor(MergeQueue<T> mergeQueue) {
+    int length = primitive1();      // size
+    if (mergeQueue.size() > 0) {
+      length += array();
+      length += (object() + primitive2()) * mergeQueue.size();
     }
     return length;
   }

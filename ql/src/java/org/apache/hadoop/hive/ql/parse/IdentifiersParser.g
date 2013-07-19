@@ -163,6 +163,7 @@ sortByClause
     ;
 
 // fun(par1, par2, par3)
+// TODO GROUP_CONCAT(DISTINCT test_score ORDER BY test_score DESC SEPARATOR ' ')
 function
 @init { gParent.msgs.push("function specification"); }
 @after { gParent.msgs.pop(); }

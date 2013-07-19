@@ -1,0 +1,41 @@
+PREHOOK: query: CREATE TABLE t2 (letter string, name string, rank int, day int) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n'
+PREHOOK: type: CREATETABLE
+POSTHOOK: query: CREATE TABLE t2 (letter string, name string, rank int, day int) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n'
+POSTHOOK: type: CREATETABLE
+POSTHOOK: Output: default@t2
+PREHOOK: query: load data local inpath '../data/files/t2.sql' overwrite into table t2
+PREHOOK: type: LOAD
+PREHOOK: Output: default@t2
+POSTHOOK: query: load data local inpath '../data/files/t2.sql' overwrite into table t2
+POSTHOOK: type: LOAD
+POSTHOOK: Output: default@t2
+PREHOOK: query: select * from t2
+PREHOOK: type: QUERY
+PREHOOK: Input: default@t2
+#### A masked pattern was here ####
+POSTHOOK: query: select * from t2
+POSTHOOK: type: QUERY
+POSTHOOK: Input: default@t2
+#### A masked pattern was here ####
+A	hello	3	20130322
+A	world	2	20130321
+A	aiya	1	20130322
+A	hello	4	20130321
+A	hello	5	20130321
+A	aiya	1	20130321
+A	hello	6	20130321
+B	yep	3	20130322
+B	dummpy	2	20130320
+B	mock	1	20130321
+C	hive	1	20130320
+PREHOOK: query: select day, group_concat(name, ",", `rank`) from t2 group by day
+PREHOOK: type: QUERY
+PREHOOK: Input: default@t2
+#### A masked pattern was here ####
+POSTHOOK: query: select day, group_concat(name, ",", `rank`) from t2 group by day
+POSTHOOK: type: QUERY
+POSTHOOK: Input: default@t2
+#### A masked pattern was here ####
+20130320	hive,dummpy
+20130321	aiya,mock,world,hello,hello,hello
+20130322	aiya,hello,yep

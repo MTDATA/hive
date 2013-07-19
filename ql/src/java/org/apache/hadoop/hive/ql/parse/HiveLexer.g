@@ -260,6 +260,7 @@ KW_USER: 'USER';
 KW_ROLE: 'ROLE';
 KW_INNER: 'INNER';
 KW_EXCHANGE: 'EXCHANGE';
+KW_GROUP_CONCAT: 'GROUP_CONCAT';
 
 // Operators
 // NOTE: if you add a new function/operator, add it to sysFuncNames so that describe function _FUNC_ will work.

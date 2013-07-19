@@ -181,6 +181,26 @@
 
   <repositories>
     <!-- This is necessary for hive-metastore dependencies. -->
+        <repository>
+            <id>nexus</id>
+            <name>local private nexus</name>
+            <url>http://nexus.sankuai.com:8081/nexus/content/groups/public</url>
+        </repository>
+        <repository>
+            <id>nexus-snapshots</id>
+            <name>local private nexus snapshots</name>
+            <url>http://nexus.sankuai.com:8081/nexus/content/groups/public-snapshots</url>
+        </repository>
+        <repository>
+            <id>mvn-public</id>
+            <name>MVNRepository</name>
+            <url>http://mvnrepository.com</url>
+        </repository>
+        <repository>
+            <id>maven-repository</id>
+            <name>Maven repository</name>
+            <url>http://repo1.maven.org/maven2/</url>
+        </repository>
     <repository>
       <id>datanucleus</id>
       <name>datanucleus maven repository</name>
