@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.LinkedList;
 import java.lang.reflect.Method;
 
+import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
@@ -143,5 +144,13 @@ public class TestFunctionRegistry extends TestCase {
 
   @Override
   protected void tearDown() {
+  }
+
+  public void testIsRankingFunction() {
+    Assert.assertTrue(FunctionRegistry.isRankingFunction("rank"));
+    Assert.assertTrue(FunctionRegistry.isRankingFunction("dense_rank"));
+    Assert.assertTrue(FunctionRegistry.isRankingFunction("percent_rank"));
+    Assert.assertTrue(FunctionRegistry.isRankingFunction("cume_dist"));
+    Assert.assertFalse(FunctionRegistry.isRankingFunction("min"));
   }
 }
