@@ -158,8 +158,8 @@ public class MergeQueue<T extends Comparable> {
     return this;
   }
 
-  public int getSize() {
-    return size;
+  public T[] getHeap() {
+    return this.heap;
   }
 
 }
