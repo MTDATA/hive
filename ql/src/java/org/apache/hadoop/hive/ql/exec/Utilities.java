@@ -407,7 +407,7 @@ public final class Utilities {
     return null;
   }
 
-  public static String serializeExpression(ExprNodeDesc expr) {
+  public synchronized static String serializeExpression(ExprNodeDesc expr) {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     XMLEncoder encoder = new XMLEncoder(baos);
     try {
@@ -444,7 +444,8 @@ public final class Utilities {
   /**
    * Serialize a single Task.
    */
-  public static void serializeTasks(Task<? extends Serializable> t, OutputStream out) {
+  public synchronized static void serializeTasks(Task<? extends Serializable> t,
+                                                 OutputStream out) {
     XMLEncoder e = null;
     try {
       e = new XMLEncoder(out);
@@ -479,7 +480,7 @@ public final class Utilities {
   /**
    * Serialize the whole query plan.
    */
-  public static void serializeQueryPlan(QueryPlan plan, OutputStream out) {
+  public synchronized static void serializeQueryPlan(QueryPlan plan, OutputStream out) {
     XMLEncoder e = new XMLEncoder(out);
     e.setExceptionListener(new ExceptionListener() {
       public void exceptionThrown(Exception e) {
@@ -519,7 +520,7 @@ public final class Utilities {
    * Serialize the mapredWork object to an output stream. DO NOT use this to write to standard
    * output since it closes the output stream. DO USE mapredWork.toXML() instead.
    */
-  public static void serializeMapRedWork(MapredWork w, OutputStream out) {
+  public synchronized static void serializeMapRedWork(MapredWork w, OutputStream out) {
     XMLEncoder e = null;
     try {
       e = new XMLEncoder(out);
@@ -552,7 +553,7 @@ public final class Utilities {
    * Serialize the mapredLocalWork object to an output stream. DO NOT use this to write to standard
    * output since it closes the output stream. DO USE mapredWork.toXML() instead.
    */
-  public static void serializeMapRedLocalWork(MapredLocalWork w, OutputStream out) {
+  public synchronized static void serializeMapRedLocalWork(MapredLocalWork w, OutputStream out) {
     XMLEncoder e = null;
     try {
       e = new XMLEncoder(out);
