@@ -23,8 +23,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -523,5 +525,52 @@ public abstract class Task<T extends Serializable> implements Serializable, Node
 
   public List<FieldSchema> getResultSchema() {
     return null;
+  }
+
+  public static String toString(Collection<Task<? extends Serializable>> top) {
+    StringBuilder builder = new StringBuilder();
+    Set<String> visited = new HashSet<String>();
+    for (Task<?> task : top) {
+      if (builder.length() > 0) {
+        builder.append('\n');
+      }
+      builder.append("  ");
+      toString(builder, visited, task, 2);
+    }
+    return builder.toString();
+  }
+
+  static void toString(StringBuilder builder, Set<String> visited, Task<?> task, int start) {
+    String name = task.getId();
+    boolean added = visited.add(name);
+    if (start > 2) {
+      builder.append("-");
+      start++;
+    }
+    builder.append(name);
+    start += name.length();
+    if (added) {
+      List<Task<?>> children;
+      if (task instanceof ConditionalTask) {
+        children = ((ConditionalTask)task).getListTasks();
+      } else {
+        children = task.getChildTasks();
+      }
+      if (children != null && task.getBackupTask() != null) {
+        children = new ArrayList<Task<?>>(children);
+        children.add(0, task.getBackupTask());
+      }
+      if (children != null && !children.isEmpty()) {
+        for (int i = 0; i < children.size(); i++) {
+          if (i > 0) {
+            builder.append('\n');
+            for (int j = 0; j < start; j++) {
+              builder.append(' ');
+            }
+          }
+          toString(builder, visited, children.get(i), start);
+        }
+      }
+    }
   }
 }
