@@ -134,7 +134,7 @@ public class PTFUtils {
   /*
    * serialization functions
    */
-  public static void serialize(OutputStream out, Object o)
+  public synchronized static void serialize(OutputStream out, Object o)
   {
     XMLEncoder e = new XMLEncoder(out);
     e.setExceptionListener(new EL());
