@@ -142,17 +142,6 @@ public class ExplainTask extends Task<ExplainWork> implements Serializable {
       outJSONObject.put("STAGE DEPENDENCIES", jsonDependencies);
     }
 
-    String tree = Task.toString(work.getRootTasks());
-    if (out != null) {
-      out.println("STAGE GRAPH:\n" + tree);
-      out.println();
-    }
-
-    if (jsonOutput) {
-      outJSONObject.put("STAGE GRAPH", tree);
-    }
-
-
     // Go over all the tasks and dump out the plans
     JSONObject jsonPlan = outputStagePlans(out, work, work.getRootTasks(), 0);
 
