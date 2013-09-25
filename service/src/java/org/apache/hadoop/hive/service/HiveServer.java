@@ -45,12 +45,14 @@ import org.apache.hadoop.hive.metastore.api.Schema;
 import org.apache.hadoop.hive.metastore.TServerSocketKeepAlive;
 import org.apache.hadoop.hive.ql.CommandNeedRetryException;
 import org.apache.hadoop.hive.ql.Driver;
+import org.apache.hadoop.hive.ql.history.HiveHistory;
 import org.apache.hadoop.hive.ql.plan.api.QueryPlan;
 import org.apache.hadoop.hive.ql.processors.CommandProcessor;
 import org.apache.hadoop.hive.ql.processors.CommandProcessorFactory;
 import org.apache.hadoop.hive.ql.processors.CommandProcessorResponse;
 import org.apache.hadoop.hive.ql.session.SessionState;
 import org.apache.hadoop.hive.shims.ShimLoader;
+import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.mapred.ClusterStatus;
 import org.apache.thrift.TException;
 import org.apache.thrift.TProcessor;
@@ -134,8 +136,21 @@ public class HiveServer extends ThriftHive {
       isHiveQuery = false;
       driver = null;
       SessionState session = new SessionState(conf);
+
+      if (SessionState.get() != null) {
+        SessionState oldSession = SessionState.get();
+        tearDownSessionIO(oldSession);
+      }
       SessionState.start(session);
       setupSessionIO(session);
+    }
+
+    private void tearDownSessionIO(SessionState session) {
+      HiveHistory hiveHist = session.getHiveHistory();
+      if (null != hiveHist) {
+        hiveHist.closeStream();
+      }
+      IOUtils.cleanup(LOG, session.out);
     }
 
     private void setupSessionIO(SessionState session) {
