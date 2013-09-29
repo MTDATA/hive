@@ -27,6 +27,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.ql.io.sarg.SearchArgument;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.util.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -60,6 +61,11 @@ final class ReaderImpl implements Reader {
     @Override
     public long getOffset() {
       return stripe.getOffset();
+    }
+
+    @Override
+    public long getLength() {
+      return stripe.getDataLength() + getIndexLength() + getFooterLength();
     }
 
     @Override
@@ -248,11 +254,13 @@ final class ReaderImpl implements Reader {
       if (version.size() >= 2) {
         minor = version.get(1);
       }
-      if (major > OrcFile.MAJOR_VERSION ||
-          (major == OrcFile.MAJOR_VERSION && minor > OrcFile.MINOR_VERSION)) {
-        log.warn("ORC file " + path + " was written by a future Hive version " +
-            versionString(version) + ". This file may not be readable by " +
-            "this version of Hive.");
+      if (major > OrcFile.Version.CURRENT.getMajor() ||
+          (major == OrcFile.Version.CURRENT.getMajor() &&
+           minor > OrcFile.Version.CURRENT.getMinor())) {
+        log.warn("ORC file " + path +
+                 " was written by a future Hive version " +
+                 versionString(version) +
+                 ". This file may not be readable by this version of Hive.");
       }
     }
   }
@@ -267,7 +275,7 @@ final class ReaderImpl implements Reader {
     ByteBuffer buffer = ByteBuffer.allocate(readSize);
     file.readFully(buffer.array(), buffer.arrayOffset() + buffer.position(),
       buffer.remaining());
-    int psLen = buffer.get(readSize - 1);
+    int psLen = buffer.get(readSize - 1) & 0xff;
     ensureOrcFooter(file, path, psLen, buffer);
     int psOffset = readSize - 1 - psLen;
     CodedInputStream in = CodedInputStream.newInstance(buffer.array(),
@@ -333,6 +341,16 @@ final class ReaderImpl implements Reader {
     return new RecordReaderImpl(this.getStripes(), fileSystem,  path, offset,
         length, footer.getTypesList(), codec, bufferSize,
         include, footer.getRowIndexStride(), sarg, columnNames);
+  }
+
+  @Override
+  public long getRawDataSize() {
+    return 0;
+  }
+
+  @Override
+  public long getRawDataSizeOfColumns(List<String> colNames) {
+    return 0;
   }
 
 }

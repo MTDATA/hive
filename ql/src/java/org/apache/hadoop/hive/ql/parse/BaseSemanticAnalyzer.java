@@ -29,6 +29,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.Tree;
@@ -37,10 +38,10 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.metastore.api.Order;
-import org.apache.hadoop.hive.metastore.api.SkewedValueList;
 import org.apache.hadoop.hive.ql.Context;
 import org.apache.hadoop.hive.ql.ErrorMsg;
 import org.apache.hadoop.hive.ql.QueryProperties;
+import org.apache.hadoop.hive.ql.exec.ExprNodeEvaluatorFactory;
 import org.apache.hadoop.hive.ql.exec.FetchTask;
 import org.apache.hadoop.hive.ql.exec.Task;
 import org.apache.hadoop.hive.ql.exec.Utilities;
@@ -60,10 +61,15 @@ import org.apache.hadoop.hive.ql.metadata.InvalidTableException;
 import org.apache.hadoop.hive.ql.metadata.Partition;
 import org.apache.hadoop.hive.ql.metadata.Table;
 import org.apache.hadoop.hive.ql.optimizer.listbucketingpruner.ListBucketingPrunerUtils;
+import org.apache.hadoop.hive.ql.plan.ExprNodeDesc;
 import org.apache.hadoop.hive.ql.plan.ListBucketingCtx;
 import org.apache.hadoop.hive.ql.plan.PlanUtils;
 import org.apache.hadoop.hive.ql.session.SessionState.LogHelper;
 import org.apache.hadoop.hive.serde.serdeConstants;
+import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspectorConverters;
+import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
+import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoUtils;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.hadoop.mapred.TextInputFormat;
@@ -303,6 +309,13 @@ public abstract class BaseSemanticAnalyzer {
 
   protected void reset() {
     rootTasks = new ArrayList<Task<? extends Serializable>>();
+  }
+
+  public static String stripIdentifierQuotes(String val) {
+    if ((val.charAt(0) == '`' && val.charAt(val.length() - 1) == '`')) {
+      val = val.substring(1, val.length() - 1);
+    }
+    return val;
   }
 
   public static String stripQuotes(String val) {
@@ -581,7 +594,7 @@ public abstract class BaseSemanticAnalyzer {
         // child 2 is the optional comment of the column
         if (child.getChildCount() == 3) {
           col.setComment(unescapeSQLString(child.getChild(2).getText()));
-        }        
+        }
       }
       colList.add(col);
     }
@@ -629,7 +642,7 @@ public abstract class BaseSemanticAnalyzer {
     case HiveParser.TOK_UNIONTYPE:
       return getUnionTypeStringFromAST(typeNode);
     default:
-      return DDLSemanticAnalyzer.getTypeName(typeNode.getType());
+      return DDLSemanticAnalyzer.getTypeName(typeNode);
     }
   }
 
@@ -749,7 +762,7 @@ public abstract class BaseSemanticAnalyzer {
         }
 
         // check if the columns specified in the partition() clause are actually partition columns
-        Utilities.validatePartSpec(tableHandle, partSpec);
+        validatePartSpec(tableHandle, partSpec, ast, conf);
 
         // check if the partition spec is valid
         if (numDynParts > 0) {
@@ -981,29 +994,16 @@ public abstract class BaseSemanticAnalyzer {
    * @return
    */
   protected ListBucketingCtx constructListBucketingCtx(List<String> skewedColNames,
-      List<List<String>> skewedValues, Map<SkewedValueList, String> skewedColValueLocationMaps,
+      List<List<String>> skewedValues, Map<List<String>, String> skewedColValueLocationMaps,
       boolean isStoredAsSubDirectories, HiveConf conf) {
     ListBucketingCtx lbCtx = new ListBucketingCtx();
     lbCtx.setSkewedColNames(skewedColNames);
     lbCtx.setSkewedColValues(skewedValues);
-    lbCtx.setLbLocationMap(convertSkewedValueListToSimpleList(skewedColValueLocationMaps));
+    lbCtx.setLbLocationMap(skewedColValueLocationMaps);
     lbCtx.setStoredAsSubDirectories(isStoredAsSubDirectories);
     lbCtx.setDefaultKey(ListBucketingPrunerUtils.HIVE_LIST_BUCKETING_DEFAULT_KEY);
     lbCtx.setDefaultDirName(ListBucketingPrunerUtils.HIVE_LIST_BUCKETING_DEFAULT_DIR_NAME);
     return lbCtx;
-  }
-
- // This is done to avoid the need of sending metastore jars to task nodes.
-  private Map<List<String>, String> convertSkewedValueListToSimpleList(
-      Map<SkewedValueList, String> skewedColValueLocationMaps) {
-    if (skewedColValueLocationMaps == null) {
-      return null;
-    }
-    Map<List<String>, String> converted = new HashMap<List<String>, String>();
-    for (Map.Entry<SkewedValueList, String> entry : skewedColValueLocationMaps.entrySet()) {
-      converted.put(entry.getKey().getSkewedValueList(), entry.getValue());
-    }
-    return converted;
   }
 
   /**
@@ -1129,4 +1129,79 @@ public abstract class BaseSemanticAnalyzer {
     return storedAsDirs;
   }
 
+  private static void getPartExprNodeDesc(ASTNode astNode,
+      Map<ASTNode, ExprNodeDesc> astExprNodeMap)
+          throws SemanticException, HiveException {
+
+    if ((astNode == null) || (astNode.getChildren() == null) ||
+        (astNode.getChildren().size() <= 1)) {
+      return;
+    }
+
+    TypeCheckCtx typeCheckCtx = new TypeCheckCtx(null);
+    for (Node childNode : astNode.getChildren()) {
+      ASTNode childASTNode = (ASTNode)childNode;
+
+      if (childASTNode.getType() != HiveParser.TOK_PARTVAL) {
+        getPartExprNodeDesc(childASTNode, astExprNodeMap);
+      } else {
+        if (childASTNode.getChildren().size() <= 1) {
+          throw new HiveException("This is dynamic partitioning");
+        }
+
+        ASTNode partValASTChild = (ASTNode)childASTNode.getChildren().get(1);
+        astExprNodeMap.put((ASTNode)childASTNode.getChildren().get(0),
+            TypeCheckProcFactory.genExprNode(partValASTChild, typeCheckCtx).get(partValASTChild));
+      }
+    }
+  }
+
+  public static void validatePartSpec(Table tbl,
+      Map<String, String> partSpec, ASTNode astNode, HiveConf conf) throws SemanticException {
+
+    Map<ASTNode, ExprNodeDesc> astExprNodeMap = new HashMap<ASTNode, ExprNodeDesc>();
+
+    Utilities.validatePartSpec(tbl, partSpec);
+
+    if (HiveConf.getBoolVar(conf, HiveConf.ConfVars.HIVE_TYPE_CHECK_ON_INSERT)) {
+      try {
+        getPartExprNodeDesc(astNode, astExprNodeMap);
+      } catch (HiveException e) {
+        return;
+      }
+      List<FieldSchema> parts = tbl.getPartitionKeys();
+      Map<String, String> partCols = new HashMap<String, String>(parts.size());
+      for (FieldSchema col : parts) {
+        partCols.put(col.getName(), col.getType().toLowerCase());
+      }
+      for (Entry<ASTNode, ExprNodeDesc> astExprNodePair : astExprNodeMap.entrySet()) {
+
+        String astKeyName = astExprNodePair.getKey().toString().toLowerCase();
+        if (astExprNodePair.getKey().getType() == HiveParser.Identifier) {
+          astKeyName = stripIdentifierQuotes(astKeyName);
+        }
+        String colType = partCols.get(astKeyName);
+        ObjectInspector inputOI = astExprNodePair.getValue().getWritableObjectInspector();
+
+        TypeInfo expectedType =
+            TypeInfoUtils.getTypeInfoFromTypeString(colType);
+        ObjectInspector outputOI =
+            TypeInfoUtils.getStandardWritableObjectInspectorFromTypeInfo(expectedType);
+        Object value = null;
+        try {
+          value =
+              ExprNodeEvaluatorFactory.get(astExprNodePair.getValue()).
+              evaluate(partSpec.get(astKeyName));
+        } catch (HiveException e) {
+          throw new SemanticException(e);
+        }
+        Object convertedValue =
+          ObjectInspectorConverters.getConverter(inputOI, outputOI).convert(value);
+        if (convertedValue == null) {
+          throw new SemanticException(ErrorMsg.PARTITION_SPEC_TYPE_MISMATCH.format(astKeyName,
+              inputOI.getTypeName(), outputOI.getTypeName()));
+        }
+      }
+    }
+  }
 }

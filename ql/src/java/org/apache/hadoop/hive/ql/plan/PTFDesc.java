@@ -26,9 +26,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.ql.exec.ExprNodeEvaluator;
 import org.apache.hadoop.hive.ql.exec.PTFUtils;
+import org.apache.hadoop.hive.ql.parse.LeadLagInfo;
 import org.apache.hadoop.hive.ql.parse.PTFInvocationSpec.Order;
 import org.apache.hadoop.hive.ql.parse.PTFInvocationSpec.PTFQueryInputType;
-import org.apache.hadoop.hive.ql.parse.PTFTranslator.LeadLagInfo;
 import org.apache.hadoop.hive.ql.parse.RowResolver;
 import org.apache.hadoop.hive.ql.parse.TypeCheckCtx;
 import org.apache.hadoop.hive.ql.parse.WindowingSpec.Direction;
@@ -52,7 +52,7 @@ public class PTFDesc extends AbstractOperatorDesc
    */
   boolean isMapSide = false;
 
-  HiveConf cfg;
+  transient HiveConf cfg;
 
   static{
     PTFUtils.makeTransient(PTFDesc.class, "llInfo");
@@ -239,28 +239,8 @@ public class PTFDesc extends AbstractOperatorDesc
   }
 
   public static class WindowTableFunctionDef extends PartitionedTableFunctionDef {
-    ArrayList<WindowExpressionDef> windowExpressions;
     ArrayList<WindowFunctionDef> windowFunctions;
-    /*
-     * this shape omits the non WdwFunction Expressions. Expr Evaluators for the Window Expressions is based on this
-     * shape, so they can refer to the Wdw Function values.
-     * @note: this will eventually be removed, as plan is to push Wdw expression processing to separate Select Op after
-     * PTF Op.
-     */
-    ShapeDetails outputFromWdwFnProcessing;
 
-    public ArrayList<WindowExpressionDef> getWindowExpressions() {
-      return windowExpressions;
-    }
-    public void setWindowExpressions(ArrayList<WindowExpressionDef> windowExpressions) {
-      this.windowExpressions = windowExpressions;
-    }
-    public ShapeDetails getOutputFromWdwFnProcessing() {
-      return outputFromWdwFnProcessing;
-    }
-    public void setOutputFromWdwFnProcessing(ShapeDetails outputFromWdwFnProcessing) {
-      this.outputFromWdwFnProcessing = outputFromWdwFnProcessing;
-    }
     public ArrayList<WindowFunctionDef> getWindowFunctions() {
       return windowFunctions;
     }

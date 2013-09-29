@@ -61,9 +61,7 @@ public class Optimizer {
         transformations.add(new ListBucketingPruner());
       }
     }
-    if (HiveConf.getBoolVar(hiveConf, HiveConf.ConfVars.HIVEOPTCP)) {
-      transformations.add(new ColumnPruner());
-    }
+    transformations.add(new ColumnPruner());
     if (HiveConf.getBoolVar(hiveConf, HiveConf.ConfVars.HIVE_OPTIMIZE_SKEWJOIN_COMPILETIME)) {
       transformations.add(new SkewJoinOptimizer());
     }
@@ -110,7 +108,14 @@ public class Optimizer {
         !HiveConf.getBoolVar(hiveConf, HiveConf.ConfVars.HIVE_OPTIMIZE_SKEWJOIN_COMPILETIME)) {
       transformations.add(new CorrelationOptimizer());
     }
+    if (HiveConf.getFloatVar(hiveConf, HiveConf.ConfVars.HIVELIMITPUSHDOWNMEMORYUSAGE) > 0) {
+      transformations.add(new LimitPushdownOptimizer());
+    }
     transformations.add(new SimpleFetchOptimizer());  // must be called last
+
+    if (HiveConf.getBoolVar(hiveConf, HiveConf.ConfVars.HIVEFETCHTASKAGGR)) {
+      transformations.add(new SimpleFetchAggregation());
+    }
   }
 
   /**

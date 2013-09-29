@@ -25,6 +25,7 @@ import java.util.Properties;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hive.ql.io.FSRecordWriter;
 import org.apache.hadoop.hive.ql.io.HiveOutputFormat;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
@@ -37,40 +38,40 @@ import org.apache.hcatalog.common.HCatUtil;
 import org.apache.hcatalog.mapreduce.OutputJobInfo;
 
 public class HBaseBaseOutputFormat implements OutputFormat<WritableComparable<?>, Put>,
-    HiveOutputFormat<WritableComparable<?>, Put> {
+  HiveOutputFormat<WritableComparable<?>, Put> {
 
-    @Override
-    public org.apache.hadoop.hive.ql.exec.FileSinkOperator.RecordWriter getHiveRecordWriter(
-        JobConf jc, Path finalOutPath,
-        Class<? extends Writable> valueClass, boolean isCompressed,
-        Properties tableProperties, Progressable progress)
-        throws IOException {
-        throw new UnsupportedOperationException("Not implemented");
-    }
+  @Override
+  public FSRecordWriter getHiveRecordWriter(
+    JobConf jc, Path finalOutPath,
+    Class<? extends Writable> valueClass, boolean isCompressed,
+    Properties tableProperties, Progressable progress)
+    throws IOException {
+    throw new UnsupportedOperationException("Not implemented");
+  }
 
-    @Override
-    public void checkOutputSpecs(FileSystem ignored, JobConf job) throws IOException {
-        OutputFormat<WritableComparable<?>, Put> outputFormat = getOutputFormat(job);
-        outputFormat.checkOutputSpecs(ignored, job);
-    }
+  @Override
+  public void checkOutputSpecs(FileSystem ignored, JobConf job) throws IOException {
+    OutputFormat<WritableComparable<?>, Put> outputFormat = getOutputFormat(job);
+    outputFormat.checkOutputSpecs(ignored, job);
+  }
 
-    @Override
-    public RecordWriter<WritableComparable<?>, Put> getRecordWriter(FileSystem ignored,
-                                                                    JobConf job, String name, Progressable progress) throws IOException {
-        OutputFormat<WritableComparable<?>, Put> outputFormat = getOutputFormat(job);
-        return outputFormat.getRecordWriter(ignored, job, name, progress);
-    }
+  @Override
+  public RecordWriter<WritableComparable<?>, Put> getRecordWriter(FileSystem ignored,
+                                  JobConf job, String name, Progressable progress) throws IOException {
+    OutputFormat<WritableComparable<?>, Put> outputFormat = getOutputFormat(job);
+    return outputFormat.getRecordWriter(ignored, job, name, progress);
+  }
 
-    private OutputFormat<WritableComparable<?>, Put> getOutputFormat(JobConf job)
-        throws IOException {
-        String outputInfo = job.get(HCatConstants.HCAT_KEY_OUTPUT_INFO);
-        OutputJobInfo outputJobInfo = (OutputJobInfo) HCatUtil.deserialize(outputInfo);
-        OutputFormat<WritableComparable<?>, Put> outputFormat = null;
-        if (HBaseHCatStorageHandler.isBulkMode(outputJobInfo)) {
-            outputFormat = new HBaseBulkOutputFormat();
-        } else {
-            outputFormat = new HBaseDirectOutputFormat();
-        }
-        return outputFormat;
+  private OutputFormat<WritableComparable<?>, Put> getOutputFormat(JobConf job)
+    throws IOException {
+    String outputInfo = job.get(HCatConstants.HCAT_KEY_OUTPUT_INFO);
+    OutputJobInfo outputJobInfo = (OutputJobInfo) HCatUtil.deserialize(outputInfo);
+    OutputFormat<WritableComparable<?>, Put> outputFormat = null;
+    if (HBaseHCatStorageHandler.isBulkMode(outputJobInfo)) {
+      outputFormat = new HBaseBulkOutputFormat();
+    } else {
+      outputFormat = new HBaseDirectOutputFormat();
     }
+    return outputFormat;
+  }
 }

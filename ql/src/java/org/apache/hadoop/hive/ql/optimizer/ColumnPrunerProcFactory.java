@@ -68,7 +68,6 @@ import org.apache.hadoop.hive.ql.plan.MapJoinDesc;
 import org.apache.hadoop.hive.ql.plan.OperatorDesc;
 import org.apache.hadoop.hive.ql.plan.PTFDesc;
 import org.apache.hadoop.hive.ql.plan.PTFDesc.PTFExpressionDef;
-import org.apache.hadoop.hive.ql.plan.PTFDesc.WindowExpressionDef;
 import org.apache.hadoop.hive.ql.plan.PTFDesc.WindowFunctionDef;
 import org.apache.hadoop.hive.ql.plan.PTFDesc.WindowTableFunctionDef;
 import org.apache.hadoop.hive.ql.plan.PlanUtils;
@@ -223,12 +222,6 @@ public final class ColumnPrunerProcFactory {
           }
         }
       }
-      if ( tDef.getWindowExpressions() != null ) {
-        for(WindowExpressionDef expr : tDef.getWindowExpressions()) {
-          ExprNodeDesc exprNode = expr.getExprNode();
-          Utilities.mergeUniqElems(prunedCols, exprNode.getCols());
-        }
-      }
      if(tDef.getPartition() != null){
          for(PTFExpressionDef col : tDef.getPartition().getExpressions()){
            ExprNodeDesc exprNode = col.getExprNode();
@@ -308,7 +301,7 @@ public final class ColumnPrunerProcFactory {
           .genColLists((Operator<? extends OperatorDesc>) nd);
       cppCtx.getPrunedColLists().put((Operator<? extends OperatorDesc>) nd,
           cols);
-      ArrayList<Integer> needed_columns = new ArrayList<Integer>();
+      List<Integer> neededColumnIds = new ArrayList<Integer>();
       List<String> neededColumnNames = new ArrayList<String>();
       RowResolver inputRR = cppCtx.getOpToParseCtxMap().get(scanOp).getRowResolver();
       TableScanDesc desc = scanOp.getConf();
@@ -339,15 +332,15 @@ public final class ColumnPrunerProcFactory {
           continue;
         }
         int position = inputRR.getPosition(cols.get(i));
-        if (position >=0) {
+        if (position >= 0) {
           // get the needed columns by id and name
-          needed_columns.add(position);
+          neededColumnIds.add(position);
           neededColumnNames.add(cols.get(i));
         }
       }
 
       desc.setVirtualCols(newVirtualCols);
-      scanOp.setNeededColumnIDs(needed_columns);
+      scanOp.setNeededColumnIDs(neededColumnIds);
       scanOp.setNeededColumns(neededColumnNames);
       return null;
     }

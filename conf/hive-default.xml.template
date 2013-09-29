@@ -431,19 +431,19 @@
 <property>
   <name>hive.mapjoin.followby.map.aggr.hash.percentmemory</name>
   <value>0.3</value>
-  <description>Portion of total memory to be used by map-side grup aggregation hash table, when this group by is followed by map join</description>
+  <description>Portion of total memory to be used by map-side group aggregation hash table, when this group by is followed by map join</description>
 </property>
 
 <property>
   <name>hive.map.aggr.hash.force.flush.memory.threshold</name>
   <value>0.9</value>
-  <description>The max memory to be used by map-side grup aggregation hash table, if the memory usage is higher than this number, force to flush data</description>
+  <description>The max memory to be used by map-side group aggregation hash table, if the memory usage is higher than this number, force to flush data</description>
 </property>
 
 <property>
   <name>hive.map.aggr.hash.percentmemory</name>
   <value>0.5</value>
-  <description>Portion of total memory to be used by map-side grup aggregation hash table</description>
+  <description>Portion of total memory to be used by map-side group aggregation hash table</description>
 </property>
 
 <property>
@@ -458,12 +458,6 @@
   <description>Hash aggregation will be turned off if the ratio between hash
   table size and input rows is bigger than this number. Set to 1 to make sure
   hash aggregation is never turned off.</description>
-</property>
-
-<property>
-  <name>hive.optimize.cp</name>
-  <value>true</value>
-  <description>Whether to enable column pruner</description>
 </property>
 
 <property>
@@ -883,7 +877,36 @@
   <description>Read from a binary stream and treat each hive.binary.record.max.length bytes as a record.
   The last record before the end of stream can have less than hive.binary.record.max.length bytes</description>
 </property>
+    
+<property>
+  <name>hive.server2.transport.mode</name>
+  <value>binary</value>
+  <description>Server transport mode. "binary" or "http".</description>
+</property>    
 
+<property>
+  <name>hive.server2.thrift.http.port</name>
+  <value>10001</value>
+  <description>Port number when in HTTP mode.</description>
+</property> 
+
+<property>
+  <name>hive.server2.thrift.http.path</name>
+  <value>cliservice</value>
+  <description>Path component of URL endpoint when in HTTP mode.</description>
+</property> 
+
+<property>
+  <name>hive.server2.thrift.http.min.worker.threads</name>
+  <value>5</value>
+  <description>Minimum number of worker threads when in HTTP mode.</description>
+</property> 
+
+<property>
+  <name>hive.server2.thrift.http.max.worker.threads</name>
+  <value>500</value>
+  <description>Maximum number of worker threads when in HTTP mode.</description>
+</property> 
 
 <property>
   <name>hive.script.recordreader</name>
@@ -1584,6 +1607,12 @@
 </property>
 
 <property>
+  <name>hive.limit.pushdown.memory.usage</name>
+  <value>0.3f</value>
+  <description>The max memory to be used for hash in RS operator for top K selection.</description>
+</property>
+
+<property>
   <name>hive.rework.mapredwork</name>
   <value>false</value>
   <description>should rework the mapred work or not.
@@ -1755,6 +1784,8 @@
   </description>
 </property>
 
+
+
 <property>
   <name>hive.hmshandler.retry.attempts</name>
   <value>1</value>
@@ -1848,8 +1879,21 @@
 
 <property>
   <name>hive.server2.thrift.max.worker.threads</name>
-  <value>100</value>
+  <value>500</value>
   <description>Maximum number of Thrift worker threads</description>
+</property>
+
+<property>
+  <name>hive.server2.async.exec.threads</name>
+  <value>50</value>
+  <description>Number of threads in the async thread pool for HiveServer2</description>
+</property>
+
+<property>
+  <name>hive.server2.async.exec.shutdown.timeout</name>
+  <value>10</value>
+  <description>Time (in seconds) for which HiveServer2 shutdown will wait for async 
+  threads to terminate</description>
 </property>
 
 <property>
@@ -1936,7 +1980,7 @@
 
 <property>
   <name>hive.server2.table.type.mapping</name>
-  <value>HIVE</value>
+  <value>CLASSIC</value>
   <description>
    This setting reflects how HiveServer will report the table types for JDBC and other
    client implementations that retrieves the available tables and supported table types
@@ -1956,5 +2000,27 @@
      This is applicable only hive server2 is configured to use kerberos authentication.
  </description>
 </property>
+
+<property>
+  <name>hive.plan.serialization.format</name>
+  <value>kryo</value>
+  <description>
+  Query plan format serialization between client and task nodes. 
+  Two supported values are : kryo and javaXML. Kryo is default.
+  </description>
+</property>
+
+<property>
+  <name>hive.metastore.schema.verification</name>
+  <value>false</value>
+   <description>
+   Enforce metastore schema version consistency.
+   True: Verify that version information stored in metastore matches with one from Hive jars.  Also disable automatic
+         schema migration attempt. Users are required to manully migrate schema after Hive upgrade which ensures
+         proper metastore schema migration. (Default)
+   False: Warn if the version information stored in metastore doesn't match with one from in Hive jars.
+   </description>
+</property>
+
 
 </configuration>
