@@ -22,7 +22,6 @@ import java.beans.DefaultPersistenceDelegate;
 import java.beans.Encoder;
 import java.beans.ExceptionListener;
 import java.beans.Expression;
-import java.beans.PersistenceDelegate;
 import java.beans.Statement;
 import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
@@ -76,7 +75,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.antlr.runtime.CommonToken;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
 import org.apache.commons.logging.Log;
@@ -265,15 +263,6 @@ public final class Utilities {
     return ret;
   }
 
-  public static class CommonTokenPersistenceDelegate extends PersistenceDelegate {
-    @Override
-    protected Expression instantiate(Object oldInstance, Encoder out) {
-      CommonToken ct = (CommonToken) oldInstance;
-      Object[] args = { ct.getType(), ct.getText() };
-      return new Expression(ct, ct.getClass(), "new", args);
-    }
-  }
-
   /**
    * Java 1.5 workaround. From http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=5015403
    */
@@ -421,7 +410,6 @@ public final class Utilities {
   public synchronized static String serializeExpression(ExprNodeDesc expr) {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     XMLEncoder encoder = new XMLEncoder(baos);
-    encoder.setPersistenceDelegate(CommonToken.class, new CommonTokenPersistenceDelegate());
     try {
       encoder.writeObject(expr);
     } finally {
@@ -465,7 +453,7 @@ public final class Utilities {
       e.setPersistenceDelegate(ExpressionTypes.class, new EnumDelegate());
       e.setPersistenceDelegate(GroupByDesc.Mode.class, new EnumDelegate());
       e.setPersistenceDelegate(Operator.ProgressCounter.class, new EnumDelegate());
-      e.setPersistenceDelegate(CommonToken.class, new CommonTokenPersistenceDelegate());
+
       e.writeObject(t);
     } finally {
       if (null != e) {
@@ -507,7 +495,6 @@ public final class Utilities {
 
     e.setPersistenceDelegate(org.datanucleus.sco.backed.Map.class, new MapDelegate());
     e.setPersistenceDelegate(org.datanucleus.sco.backed.List.class, new ListDelegate());
-    e.setPersistenceDelegate(CommonToken.class, new CommonTokenPersistenceDelegate());
 
     e.writeObject(plan);
     e.close();
@@ -540,7 +527,6 @@ public final class Utilities {
       // workaround for java 1.5
       e.setPersistenceDelegate(ExpressionTypes.class, new EnumDelegate());
       e.setPersistenceDelegate(GroupByDesc.Mode.class, new EnumDelegate());
-      e.setPersistenceDelegate(CommonToken.class, new CommonTokenPersistenceDelegate());
       e.writeObject(w);
     } finally {
       if (null != e) {
@@ -574,7 +560,6 @@ public final class Utilities {
       // workaround for java 1.5
       e.setPersistenceDelegate(ExpressionTypes.class, new EnumDelegate());
       e.setPersistenceDelegate(GroupByDesc.Mode.class, new EnumDelegate());
-      e.setPersistenceDelegate(CommonToken.class, new CommonTokenPersistenceDelegate());
       e.writeObject(w);
     } finally {
       if (null != e) {
