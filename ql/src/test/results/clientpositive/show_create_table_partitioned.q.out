@@ -22,7 +22,7 @@ CREATE EXTERNAL TABLE `tmp_showcrt1`(
   `newvalue` boolean COMMENT 'a new value')
 COMMENT 'temporary table'
 PARTITIONED BY ( 
-  value bigint COMMENT 'some value')
+  `value` bigint COMMENT 'some value')
 ROW FORMAT SERDE 
   'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' 
 STORED AS INPUTFORMAT 
