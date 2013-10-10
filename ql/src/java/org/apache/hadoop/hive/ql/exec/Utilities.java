@@ -421,7 +421,6 @@ public final class Utilities {
   public synchronized static String serializeExpression(ExprNodeDesc expr) {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     XMLEncoder encoder = new XMLEncoder(baos);
-    encoder.setPersistenceDelegate(CommonToken.class, new CommonTokenPersistenceDelegate());
     try {
       encoder.writeObject(expr);
     } finally {
@@ -465,7 +464,6 @@ public final class Utilities {
       e.setPersistenceDelegate(ExpressionTypes.class, new EnumDelegate());
       e.setPersistenceDelegate(GroupByDesc.Mode.class, new EnumDelegate());
       e.setPersistenceDelegate(Operator.ProgressCounter.class, new EnumDelegate());
-      e.setPersistenceDelegate(CommonToken.class, new CommonTokenPersistenceDelegate());
       e.writeObject(t);
     } finally {
       if (null != e) {
@@ -507,7 +505,6 @@ public final class Utilities {
 
     e.setPersistenceDelegate(org.datanucleus.sco.backed.Map.class, new MapDelegate());
     e.setPersistenceDelegate(org.datanucleus.sco.backed.List.class, new ListDelegate());
-    e.setPersistenceDelegate(CommonToken.class, new CommonTokenPersistenceDelegate());
 
     e.writeObject(plan);
     e.close();
@@ -574,7 +571,6 @@ public final class Utilities {
       // workaround for java 1.5
       e.setPersistenceDelegate(ExpressionTypes.class, new EnumDelegate());
       e.setPersistenceDelegate(GroupByDesc.Mode.class, new EnumDelegate());
-      e.setPersistenceDelegate(CommonToken.class, new CommonTokenPersistenceDelegate());
       e.writeObject(w);
     } finally {
       if (null != e) {
