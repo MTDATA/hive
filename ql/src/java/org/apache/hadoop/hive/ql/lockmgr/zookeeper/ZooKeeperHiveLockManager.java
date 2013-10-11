@@ -421,6 +421,8 @@ public class ZooKeeperHiveLockManager implements HiveLockManager {
     int tryNum = 0;
     do {
       try {
+        LOG.error(conf.getIntVar(HiveConf.ConfVars.HADOOPJOBNAMEPREFIX) + " tryNum=" + tryNum +
+            " numRetriesForUnLock=" + numRetriesForUnLock);
         tryNum++;
         if (tryNum > 1) {
           Thread.sleep(sleepTime);
@@ -429,6 +431,12 @@ public class ZooKeeperHiveLockManager implements HiveLockManager {
         unlockPrimitive(conf, zkpClient, hiveLock, parent);
         break;
       } catch (Exception e) {
+        try {
+          LOG.error(conf.getIntVar(HiveConf.ConfVars.HADOOPJOBNAMEPREFIX) + " tryNum=" + tryNum +
+              " numRetriesForUnLock=" + numRetriesForUnLock + e.getMessage(), e);
+        } catch (Exception e1) {
+          LOG.error(e1.getMessage(), e1);
+        }
         if (tryNum >= numRetriesForUnLock) {
           throw new LockException(e);
         }
