@@ -423,8 +423,6 @@ public class ZooKeeperHiveLockManager implements HiveLockManager {
     int tryNum = 0;
     do {
       try {
-        LOG.error(conf.getIntVar(HiveConf.ConfVars.HADOOPJOBNAME) + " tryNum=" + tryNum +
-            " numRetriesForUnLock=" + numRetriesForUnLock);
         tryNum++;
         if (tryNum > 1) {
           Thread.sleep(sleepTime);
