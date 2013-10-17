@@ -96,6 +96,7 @@ public class RetryingRawStore implements InvocationHandler {
     boolean gotNewConnectUrl = false;
     boolean reloadConf = HiveConf.getBoolVar(hiveConf,
         HiveConf.ConfVars.METASTOREFORCERELOADCONF);
+    boolean reloadConfOnJdoException = false;
 
     if (reloadConf) {
       MetaStoreInit.updateConnectionURL(hiveConf, getConf(), null, metaStoreInitData);
@@ -105,7 +106,7 @@ public class RetryingRawStore implements InvocationHandler {
     Exception caughtException = null;
     while (true) {
       try {
-        if (reloadConf || gotNewConnectUrl) {
+        if (reloadConf || gotNewConnectUrl || reloadConfOnJdoException) {
           initMS();
         }
         ret = method.invoke(base, args);
@@ -119,6 +120,8 @@ public class RetryingRawStore implements InvocationHandler {
           // Due to reflection, the jdo exception is wrapped in
           // invocationTargetException
           caughtException = (javax.jdo.JDOException) e.getCause();
+          reloadConfOnJdoException = true;
+          LOG.error("rawstore jdoexception:" + caughtException.toString());
         }
         else
           throw e.getCause();
