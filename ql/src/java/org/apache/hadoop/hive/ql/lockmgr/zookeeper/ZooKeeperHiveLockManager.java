@@ -309,10 +309,6 @@ public class ZooKeeperHiveLockManager implements HiveLockManager {
       try {
         if (tryNum > 1) {
           Thread.sleep(sleepTime);
-          if (zooKeeper.getState() == ZooKeeper.States.CLOSED) {
-            // Reconnect if the connection is closed.
-            zooKeeper = null;
-          }
           prepareRetry();
         }
         ret = lockPrimitive(key, mode, keepAlive, parentCreated);
@@ -760,6 +756,10 @@ public class ZooKeeperHiveLockManager implements HiveLockManager {
   @Override
   public void prepareRetry() throws LockException {
     try {
+      if (zooKeeper != null && zooKeeper.getState() == ZooKeeper.States.CLOSED) {
+        // Reconnect if the connection is closed.
+        zooKeeper = null;
+      }
       renewZookeeperInstance(sessionTimeout, quorumServers);
     } catch (Exception e) {
       throw new LockException(e);
