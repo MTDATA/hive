@@ -55,6 +55,8 @@ import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
 
+import com.google.common.annotations.VisibleForTesting;
+
 public class ZooKeeperHiveLockManager implements HiveLockManager {
   HiveLockManagerCtx ctx;
   public static final Log LOG = LogFactory.getLog("ZooKeeperHiveLockManager");
@@ -307,10 +309,6 @@ public class ZooKeeperHiveLockManager implements HiveLockManager {
       try {
         if (tryNum > 1) {
           Thread.sleep(sleepTime);
-          if (zooKeeper.getState() == ZooKeeper.States.CLOSED) {
-            // Reconnect if the connection is closed.
-            zooKeeper = null;
-          }
           prepareRetry();
         }
         ret = lockPrimitive(key, mode, keepAlive, parentCreated);
@@ -447,20 +445,25 @@ public class ZooKeeperHiveLockManager implements HiveLockManager {
   }
 
   /* Remove the lock specified */
-  private static void unlockPrimitive(HiveConf conf, ZooKeeper zkpClient,
+  @VisibleForTesting
+  static void unlockPrimitive(HiveConf conf, ZooKeeper zkpClient,
                              HiveLock hiveLock, String parent) throws LockException {
     ZooKeeperHiveLock zLock = (ZooKeeperHiveLock)hiveLock;
     try {
+      // can throw KeeperException.NoNodeException, which might mean something is wrong
       zkpClient.delete(zLock.getPath(), -1);
 
       // Delete the parent node if all the children have been deleted
       HiveLockObject obj = zLock.getHiveLockObject();
       String name  = getLastObjectName(parent, obj);
 
-      List<String> children = zkpClient.getChildren(name, false);
-      if ((children == null) || (children.isEmpty()))
-      {
-        zkpClient.delete(name, -1);
+      try {
+        List<String> children = zkpClient.getChildren(name, false);
+        if (children == null || children.isEmpty()) {
+          zkpClient.delete(name, -1);
+        }
+      } catch (KeeperException.NoNodeException e) {
+        LOG.debug("Node " + name + " previously deleted when attempting to delete.");
       }
     } catch (Exception e) {
       LOG.error("Failed to release ZooKeeper lock: ", e);
@@ -753,6 +756,10 @@ public class ZooKeeperHiveLockManager implements HiveLockManager {
   @Override
   public void prepareRetry() throws LockException {
     try {
+      if (zooKeeper != null && zooKeeper.getState() == ZooKeeper.States.CLOSED) {
+        // Reconnect if the connection is closed.
+        zooKeeper = null;
+      }
       renewZookeeperInstance(sessionTimeout, quorumServers);
     } catch (Exception e) {
       throw new LockException(e);
