@@ -252,7 +252,7 @@ public class ZooKeeperHiveLockManager implements HiveLockManager {
   public void releaseLocks(List<HiveLock> hiveLocks) {
     if (hiveLocks != null) {
       int len = hiveLocks.size();
-      LOG.warn(ctx.getConf().getIntVar(HiveConf.ConfVars.HADOOPJOBNAME) + " totalLockNum=" +
+      LOG.warn(ctx.getConf().getVar(HiveConf.ConfVars.HADOOPJOBNAME) + " totalLockNum=" +
           len);
       for (int pos = len-1; pos >= 0; pos--) {
         HiveLock hiveLock = hiveLocks.get(pos);
@@ -430,7 +430,7 @@ public class ZooKeeperHiveLockManager implements HiveLockManager {
         break;
       } catch (Exception e) {
         try {
-          LOG.error(conf.getIntVar(HiveConf.ConfVars.HADOOPJOBNAME) + " tryNum=" + tryNum +
+          LOG.error(conf.getVar(HiveConf.ConfVars.HADOOPJOBNAME) + " tryNum=" + tryNum +
               " numRetriesForUnLock=" + numRetriesForUnLock + e.getMessage(), e);
         } catch (Exception e1) {
           LOG.error(e1.getMessage(), e1);
