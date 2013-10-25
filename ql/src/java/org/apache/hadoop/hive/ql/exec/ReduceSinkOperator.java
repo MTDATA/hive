@@ -296,9 +296,9 @@ public class ReduceSinkOperator extends TerminalOperator<ReduceSinkDesc>
         keyWritable.setHashCode(keyHashCode);
         if (out != null) {
           if (numDistinctExprs > 0 && i > 0) {
-            collect(keyWritable, new BytesWritable());
+            out.collect(keyWritable, new BytesWritable());
           } else {
-            collect(keyWritable, value);
+            out.collect(keyWritable, value);
           }
           // Since this is a terminal operator, update counters explicitly -
           // forward is not called
