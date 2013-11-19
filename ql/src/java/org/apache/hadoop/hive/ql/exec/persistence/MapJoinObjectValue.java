@@ -30,7 +30,7 @@ import org.apache.hadoop.hive.ql.exec.MapJoinMetaData;
 import org.apache.hadoop.hive.ql.exec.MapJoinOperator;
 import org.apache.hadoop.hive.ql.metadata.HiveException;
 import org.apache.hadoop.hive.serde2.SerDeException;
-import org.apache.hadoop.hive.serde2.io.ShortWritable;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspectorUtils;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspectorUtils.ObjectInspectorCopyOption;
 import org.apache.hadoop.io.Writable;
@@ -112,7 +112,7 @@ public class MapJoinObjectValue implements Externalizable {
               Object[] array = memObj.toArray();
               res.add(array);
               if (ctx.hasFilterTag()) {
-                aliasFilter &= ((ShortWritable)array[array.length - 1]).get();
+                aliasFilter &= ((LongWritable)array[array.length - 1]).get();
               }
             }
           }
