@@ -20,8 +20,8 @@ public class TestUDFOPDivide {
     Assert.assertNull(result);
 
     // Decimal
-    HiveDecimalWritable dec1 = new HiveDecimalWritable(HiveDecimal.create("4.5"));
-    HiveDecimalWritable dec2 = new HiveDecimalWritable(HiveDecimal.create("0"));
+    HiveDecimalWritable dec1 = new HiveDecimalWritable(new HiveDecimal("4.5"));
+    HiveDecimalWritable dec2 = new HiveDecimalWritable(new HiveDecimal("0"));
     HiveDecimalWritable dec3 = udf.evaluate(dec1, dec2);
     Assert.assertNull(dec3);
   }
