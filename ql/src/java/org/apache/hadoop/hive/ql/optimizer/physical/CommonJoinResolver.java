@@ -37,6 +37,7 @@ import org.apache.hadoop.hive.ql.exec.FileSinkOperator;
 import org.apache.hadoop.hive.ql.exec.JoinOperator;
 import org.apache.hadoop.hive.ql.exec.MapRedTask;
 import org.apache.hadoop.hive.ql.exec.Operator;
+import org.apache.hadoop.hive.ql.exec.TableScanOperator;
 import org.apache.hadoop.hive.ql.exec.Task;
 import org.apache.hadoop.hive.ql.exec.TaskFactory;
 import org.apache.hadoop.hive.ql.exec.Utilities;
@@ -224,22 +225,28 @@ public class CommonJoinResolver implements PhysicalPlanResolver {
         }
       }
 
+      // Merge the 2 trees - remove the FileSinkOperator from the first tree pass it to the
+      // top of the second
       Operator<? extends Serializable> childAliasOp =
           childWork.getAliasToWork().values().iterator().next();
       if (fop.getParentOperators().size() > 1) {
         return;
       }
-
-      // Merge the 2 trees - remove the FileSinkOperator from the first tree pass it to the
-      // top of the second
       Operator<? extends Serializable> parentFOp = fop.getParentOperators().get(0);
-      parentFOp.getChildOperators().remove(fop);
-      parentFOp.getChildOperators().add(childAliasOp);
-      List<Operator<? extends OperatorDesc>> parentOps =
-          new ArrayList<Operator<? extends OperatorDesc>>();
-      parentOps.add(parentFOp);
-      childAliasOp.setParentOperators(parentOps);
-
+      // remove the unnecessary TableScan
+      if (childAliasOp instanceof TableScanOperator) {
+        TableScanOperator tso = (TableScanOperator)childAliasOp;
+        if (tso.getNumChild() != 1) {
+          // shouldn't happen
+          return;
+        }
+        childAliasOp = tso.getChildOperators().get(0);
+        childAliasOp.replaceParent(tso, parentFOp);
+      } else {
+        childAliasOp.setParentOperators(Utilities.makeList(parentFOp));
+      }
+      parentFOp.replaceChild(fop, childAliasOp);
+ 
       work.getAliasToPartnInfo().putAll(childWork.getAliasToPartnInfo());
       for (Map.Entry<String, PartitionDesc> childWorkEntry :
         childWork.getPathToPartitionInfo().entrySet()) {
@@ -506,7 +513,7 @@ public class CommonJoinResolver implements PhysicalPlanResolver {
               HiveConf.ConfVars.HIVECONVERTJOINNOCONDITIONALTASKTHRESHOLD);
 
           boolean bigTableFound = false;
-          long largestBigTableCandidateSize = 0;
+          long largestBigTableCandidateSize = -1;
           long sumTableSizes = 0;
           for (String alias : aliasToWork.keySet()) {
             int tablePosition = getPosition(currWork, joinOp, alias);
