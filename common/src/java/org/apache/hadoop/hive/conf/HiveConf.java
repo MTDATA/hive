@@ -913,7 +913,8 @@ public class HiveConf extends Configuration {
 
   public void verifyAndSet(String name, String value) throws IllegalArgumentException {
     if (restrictList.contains(name)) {
-      throw new IllegalArgumentException("Cann't modify " + name + " at runtime");
+      //throw new IllegalArgumentException("Cann't modify " + name + " at runtime");
+      System.err.println("Cann't modify " + name + " at runtime");
     } else {
       set(name, value);
     }
