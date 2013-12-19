@@ -25,6 +25,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -94,8 +95,8 @@ public class CliDriver {
     console = new LogHelper(LOG);
   }
 
-  public int processCmd(String cmd) {
-    CliSessionState ss = (CliSessionState) SessionState.get();
+  public int processCmd(final String cmd) {
+    final CliSessionState ss = (CliSessionState) SessionState.get();
     // Flush the print stream, so it doesn't include output from the last command
     ss.err.flush();
     String cmd_trimmed = cmd.trim();
@@ -212,8 +213,15 @@ public class CliDriver {
         }
       }
     } else { // local mode
-      CommandProcessor proc = CommandProcessorFactory.get(tokens[0], (HiveConf) conf);
-      ret = processLocalCmd(cmd, proc, ss);
+      final String token0 = tokens[0];
+      ret = ss.doAs(new PrivilegedAction<Integer>() {
+        @Override
+        public Integer run() {
+          CommandProcessor proc = CommandProcessorFactory.get(token0,
+              (HiveConf) conf);
+          return processLocalCmd(cmd, proc, ss);
+        }
+      });
     }
 
     return ret;
@@ -642,7 +650,12 @@ public class CliDriver {
     } catch (UnsupportedEncodingException e) {
       return 3;
     }
-
+    try {
+      ss.initUserGroupInformation();
+    } catch (IOException e) {
+      SessionState.getConsole().printError("local kerberos init failed");
+      e.printStackTrace(SessionState.getConsole().getErrStream());
+    }
     if (!oproc.process_stage2(ss)) {
       return 2;
     }
@@ -735,8 +748,8 @@ public class CliDriver {
                            " does not exist.   History will not be available during this session.");
       }
     } catch (Exception e) {
-      System.err.println("WARNING: Encountered an error while trying to initialize Hive's " +
-                         "history file.  History will not be available during this session.");
+      System.err.println("WARNING: Encountered an error while trying to " +
+          "initialize Hive's " + "history file.  History will not be available during this session.");
       System.err.println(e.getMessage());
     }
 

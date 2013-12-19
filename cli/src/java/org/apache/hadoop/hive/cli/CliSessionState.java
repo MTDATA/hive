@@ -19,6 +19,7 @@
 package org.apache.hadoop.hive.cli;
 
 import java.io.IOException;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -28,6 +29,10 @@ import org.apache.hadoop.hive.ql.metadata.Hive;
 import org.apache.hadoop.hive.ql.metadata.HiveException;
 import org.apache.hadoop.hive.ql.session.SessionState;
 import org.apache.hadoop.hive.service.HiveClient;
+import org.apache.hadoop.hive.shims.ShimLoader;
+import org.apache.hadoop.security.SecurityUtil;
+import org.apache.hadoop.security.UserGroupInformation;
+import org.apache.hive.service.auth.HiveAuthFactory;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
@@ -77,6 +82,8 @@ public class CliSessionState extends SessionState {
   private HiveClient client;
 
   private Hive hive; // currently only used (and init'ed) in getCurrentDbName
+
+  private UserGroupInformation ugi;
 
   public CliSessionState(HiveConf conf) {
     super(conf);
@@ -141,5 +148,38 @@ public class CliSessionState extends SessionState {
       }
     }
     return hive.getCurrentDatabase();
+  }
+
+  public void initUserGroupInformation() throws IOException {
+    if (!remoteMode) {
+      String authTypeStr = conf.getVar(HiveConf.ConfVars.HIVE_LOCAL_AUTHENTICATION);
+      if (authTypeStr == null) {
+        ugi = null;
+      } else if (authTypeStr.equalsIgnoreCase(HiveAuthFactory.AuthTypes.KERBEROS
+          .getAuthName()) && ShimLoader.getHadoopShims().isSecureShimImpl()) {
+        String kerberosName;
+        String principalConf = conf.getVar(HiveConf.ConfVars
+            .HIVE_LOCAL_KERBEROS_PRINCIPAL);
+        String keytabFile = conf.getVar(HiveConf.ConfVars
+            .HIVE_LOCAL_KERBEROS_KEYTAB_FILE);
+        kerberosName = SecurityUtil.getServerPrincipal(principalConf, "0.0.0.0");
+        ugi = UserGroupInformation.loginUserFromKeytabAndReturnUGI
+            (kerberosName, keytabFile);
+        getConsole().printInfo("Login UGI : " + ugi);
+        String proxyUser = conf.getVar(HiveConf.ConfVars.HIVE_LOCAL_KERBEROS_PROXY_USER);
+        if (proxyUser != null && !"".equals(proxyUser.trim())) {
+          ugi = UserGroupInformation.createProxyUser(proxyUser, ugi);
+          getConsole().printInfo("Proxy UGI : " + ugi);
+        }
+      }
+    }
+  }
+
+  public UserGroupInformation getUgi() {
+    return ugi;
+  }
+
+  public Integer doAs(PrivilegedAction<Integer> action) {
+    return ugi != null? ugi.doAs(action) : action.run();
   }
 }
