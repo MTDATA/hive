@@ -663,6 +663,10 @@ public class HiveConf extends Configuration {
     HIVE_AUTHORIZATION_TABLE_ROLE_GRANTS("hive.security.authorization.createtable.role.grants", ""),
     HIVE_AUTHORIZATION_TABLE_OWNER_GRANTS("hive.security.authorization.createtable.owner.grants",
         ""),
+    HIVE_LOCAL_KERBEROS_KEYTAB_FILE("hive.local.kerberos.keytab.file", ""),
+    HIVE_LOCAL_KERBEROS_PRINCIPAL("hive.local.kerberos.principal", "hive-local/_HOST@EXAMPLE.COM"),
+    HIVE_LOCAL_KERBEROS_PROXY_USER("hive.local.kerberos.proxy.user", ""),
+    HIVE_LOCAL_AUTHENTICATION("hive.local.sasl.enabled", "NONE"),
 
     // Print column names in output
     HIVE_CLI_PRINT_HEADER("hive.cli.print.header", false),
