@@ -1,0 +1,531 @@
+PREHOOK: query: create table default_alter6 (a int) partitioned by (p string)
+PREHOOK: type: CREATETABLE
+POSTHOOK: query: create table default_alter6 (a int) partitioned by (p string)
+POSTHOOK: type: CREATETABLE
+POSTHOOK: Output: default@default_alter6
+PREHOOK: query: alter table default_alter6 add partition (p='p0')
+PREHOOK: type: ALTERTABLE_ADDPARTS
+PREHOOK: Input: default@default_alter6
+POSTHOOK: query: alter table default_alter6 add partition (p='p0')
+POSTHOOK: type: ALTERTABLE_ADDPARTS
+POSTHOOK: Input: default@default_alter6
+POSTHOOK: Output: default@default_alter6@p=p0
+PREHOOK: query: LOAD DATA LOCAL INPATH '../data/files/in1.txt' into table default_alter6 PARTITION (p='p0')
+PREHOOK: type: LOAD
+PREHOOK: Output: default@default_alter6@p=p0
+POSTHOOK: query: LOAD DATA LOCAL INPATH '../data/files/in1.txt' into table default_alter6 PARTITION (p='p0')
+POSTHOOK: type: LOAD
+POSTHOOK: Output: default@default_alter6@p=p0
+PREHOOK: query: show create table default_alter6
+PREHOOK: type: SHOW_CREATETABLE
+PREHOOK: Input: default@default_alter6
+POSTHOOK: query: show create table default_alter6
+POSTHOOK: type: SHOW_CREATETABLE
+POSTHOOK: Input: default@default_alter6
+CREATE  TABLE `default_alter6`(
+  `a` int)
+PARTITIONED BY ( 
+  `p` string)
+ROW FORMAT SERDE 
+  'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' 
+STORED AS INPUTFORMAT 
+  'org.apache.hadoop.mapred.TextInputFormat' 
+OUTPUTFORMAT 
+  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+LOCATION
+#### A masked pattern was here ####
+TBLPROPERTIES (
+  'numPartitions'='1', 
+  'numFiles'='1', 
+#### A masked pattern was here ####
+  'numRows'='0', 
+  'totalSize'='16', 
+  'rawDataSize'='0')
+PREHOOK: query: select * from default_alter6
+PREHOOK: type: QUERY
+PREHOOK: Input: default@default_alter6
+PREHOOK: Input: default@default_alter6@p=p0
+#### A masked pattern was here ####
+POSTHOOK: query: select * from default_alter6
+POSTHOOK: type: QUERY
+POSTHOOK: Input: default@default_alter6
+POSTHOOK: Input: default@default_alter6@p=p0
+#### A masked pattern was here ####
+NULL	p0
+48	p0
+100	p0
+PREHOOK: query: create database db6
+PREHOOK: type: CREATEDATABASE
+POSTHOOK: query: create database db6
+POSTHOOK: type: CREATEDATABASE
+PREHOOK: query: alter table default.default_alter6 rename to db6.alter6
+PREHOOK: type: ALTERTABLE_RENAME
+PREHOOK: Input: default@default_alter6
+PREHOOK: Output: default@default_alter6
+POSTHOOK: query: alter table default.default_alter6 rename to db6.alter6
+POSTHOOK: type: ALTERTABLE_RENAME
+POSTHOOK: Input: default@default_alter6
+POSTHOOK: Output: db6@alter6
+POSTHOOK: Output: default@default_alter6
+PREHOOK: query: use db6
+PREHOOK: type: SWITCHDATABASE
+POSTHOOK: query: use db6
+POSTHOOK: type: SWITCHDATABASE
+PREHOOK: query: show create table db6.alter6
+PREHOOK: type: SHOW_CREATETABLE
+PREHOOK: Input: db6@alter6
+POSTHOOK: query: show create table db6.alter6
+POSTHOOK: type: SHOW_CREATETABLE
+POSTHOOK: Input: db6@alter6
+CREATE  TABLE `db6.alter6`(
+  `a` int)
+PARTITIONED BY ( 
+  `p` string)
+ROW FORMAT SERDE 
+  'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' 
+STORED AS INPUTFORMAT 
+  'org.apache.hadoop.mapred.TextInputFormat' 
+OUTPUTFORMAT 
+  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+LOCATION
+#### A masked pattern was here ####
+TBLPROPERTIES (
+  'numPartitions'='1', 
+  'numFiles'='1', 
+#### A masked pattern was here ####
+  'numRows'='0', 
+  'totalSize'='16', 
+  'rawDataSize'='0')
+PREHOOK: query: select * from db6.alter6
+PREHOOK: type: QUERY
+PREHOOK: Input: db6@alter6
+PREHOOK: Input: db6@alter6@p=p0
+#### A masked pattern was here ####
+POSTHOOK: query: select * from db6.alter6
+POSTHOOK: type: QUERY
+POSTHOOK: Input: db6@alter6
+POSTHOOK: Input: db6@alter6@p=p0
+#### A masked pattern was here ####
+NULL	p0
+48	p0
+100	p0
+PREHOOK: query: alter table db6.alter6 add columns (b int)
+PREHOOK: type: ALTERTABLE_ADDCOLS
+PREHOOK: Input: db6@alter6
+PREHOOK: Output: db6@alter6
+POSTHOOK: query: alter table db6.alter6 add columns (b int)
+POSTHOOK: type: ALTERTABLE_ADDCOLS
+POSTHOOK: Input: db6@alter6
+POSTHOOK: Output: db6@alter6
+PREHOOK: query: describe db6.alter6
+PREHOOK: type: DESCTABLE
+POSTHOOK: query: describe db6.alter6
+POSTHOOK: type: DESCTABLE
+a                   	int                 	None                
+b                   	int                 	None                
+p                   	string              	None                
+	 	 
+# Partition Information	 	 
+# col_name            	data_type           	comment             
+	 	 
+p                   	string              	None                
+PREHOOK: query: alter table db6.alter6 replace columns (a int, b int, c string)
+PREHOOK: type: ALTERTABLE_REPLACECOLS
+PREHOOK: Input: db6@alter6
+PREHOOK: Output: db6@alter6
+POSTHOOK: query: alter table db6.alter6 replace columns (a int, b int, c string)
+POSTHOOK: type: ALTERTABLE_REPLACECOLS
+POSTHOOK: Input: db6@alter6
+POSTHOOK: Output: db6@alter6
+PREHOOK: query: describe db6.alter6
+PREHOOK: type: DESCTABLE
+POSTHOOK: query: describe db6.alter6
+POSTHOOK: type: DESCTABLE
+a                   	int                 	None                
+b                   	int                 	None                
+c                   	string              	None                
+p                   	string              	None                
+	 	 
+# Partition Information	 	 
+# col_name            	data_type           	comment             
+	 	 
+p                   	string              	None                
+PREHOOK: query: alter table db6.alter6 change column c cc int
+PREHOOK: type: ALTERTABLE_RENAMECOL
+PREHOOK: Input: db6@alter6
+PREHOOK: Output: db6@alter6
+POSTHOOK: query: alter table db6.alter6 change column c cc int
+POSTHOOK: type: ALTERTABLE_RENAMECOL
+POSTHOOK: Input: db6@alter6
+POSTHOOK: Output: db6@alter6
+PREHOOK: query: describe db6.alter6
+PREHOOK: type: DESCTABLE
+POSTHOOK: query: describe db6.alter6
+POSTHOOK: type: DESCTABLE
+a                   	int                 	None                
+b                   	int                 	None                
+cc                  	int                 	None                
+p                   	string              	None                
+	 	 
+# Partition Information	 	 
+# col_name            	data_type           	comment             
+	 	 
+p                   	string              	None                
+PREHOOK: query: show partitions alter6
+PREHOOK: type: SHOWPARTITIONS
+POSTHOOK: query: show partitions alter6
+POSTHOOK: type: SHOWPARTITIONS
+p=p0
+PREHOOK: query: alter table db6.alter6 add partition (p='p1')
+PREHOOK: type: ALTERTABLE_ADDPARTS
+PREHOOK: Input: db6@alter6
+POSTHOOK: query: alter table db6.alter6 add partition (p='p1')
+POSTHOOK: type: ALTERTABLE_ADDPARTS
+POSTHOOK: Input: db6@alter6
+POSTHOOK: Output: db6@alter6@p=p1
+PREHOOK: query: show partitions alter6
+PREHOOK: type: SHOWPARTITIONS
+POSTHOOK: query: show partitions alter6
+POSTHOOK: type: SHOWPARTITIONS
+p=p0
+p=p1
+PREHOOK: query: alter table db6.alter6 touch partition(p='p1')
+PREHOOK: type: ALTERTABLE_TOUCH
+PREHOOK: Input: db6@alter6
+PREHOOK: Output: db6@alter6@p=p1
+POSTHOOK: query: alter table db6.alter6 touch partition(p='p1')
+POSTHOOK: type: ALTERTABLE_TOUCH
+POSTHOOK: Input: db6@alter6
+POSTHOOK: Input: db6@alter6@p=p1
+POSTHOOK: Output: db6@alter6@p=p1
+PREHOOK: query: alter table db6.alter6 archive partition (p='p1')
+PREHOOK: type: ALTERTABLE_ARCHIVE
+PREHOOK: Input: db6@alter6
+PREHOOK: Output: db6@alter6@p=p1
+POSTHOOK: query: alter table db6.alter6 archive partition (p='p1')
+POSTHOOK: type: ALTERTABLE_ARCHIVE
+POSTHOOK: Input: db6@alter6
+POSTHOOK: Output: db6@alter6@p=p1
+PREHOOK: query: describe extended alter6 partition (p='p1')
+PREHOOK: type: DESCTABLE
+POSTHOOK: query: describe extended alter6 partition (p='p1')
+POSTHOOK: type: DESCTABLE
+a                   	int                 	None                
+b                   	int                 	None                
+cc                  	int                 	None                
+p                   	string              	None                
+	 	 
+# Partition Information	 	 
+# col_name            	data_type           	comment             
+	 	 
+p                   	string              	None                
+	 	 
+#### A masked pattern was here ####
+PREHOOK: query: alter table db6.alter6 unarchive partition (p='p1')
+PREHOOK: type: ALTERTABLE_UNARCHIVE
+PREHOOK: Input: db6@alter6
+PREHOOK: Output: db6@alter6@p=p1
+POSTHOOK: query: alter table db6.alter6 unarchive partition (p='p1')
+POSTHOOK: type: ALTERTABLE_UNARCHIVE
+POSTHOOK: Input: db6@alter6
+POSTHOOK: Output: db6@alter6@p=p1
+PREHOOK: query: describe extended alter6 partition (p='p1')
+PREHOOK: type: DESCTABLE
+POSTHOOK: query: describe extended alter6 partition (p='p1')
+POSTHOOK: type: DESCTABLE
+a                   	int                 	None                
+b                   	int                 	None                
+cc                  	int                 	None                
+p                   	string              	None                
+	 	 
+# Partition Information	 	 
+# col_name            	data_type           	comment             
+	 	 
+p                   	string              	None                
+	 	 
+#### A masked pattern was here ####
+PREHOOK: query: show partitions alter6
+PREHOOK: type: SHOWPARTITIONS
+POSTHOOK: query: show partitions alter6
+POSTHOOK: type: SHOWPARTITIONS
+p=p0
+p=p1
+PREHOOK: query: alter table db6.alter6 drop partition (p='p1')
+PREHOOK: type: ALTERTABLE_DROPPARTS
+PREHOOK: Input: db6@alter6
+PREHOOK: Output: db6@alter6@p=p1
+POSTHOOK: query: alter table db6.alter6 drop partition (p='p1')
+POSTHOOK: type: ALTERTABLE_DROPPARTS
+POSTHOOK: Input: db6@alter6
+POSTHOOK: Output: db6@alter6@p=p1
+PREHOOK: query: show partitions alter6
+PREHOOK: type: SHOWPARTITIONS
+POSTHOOK: query: show partitions alter6
+POSTHOOK: type: SHOWPARTITIONS
+p=p0
+PREHOOK: query: alter table db6.alter6 set tblproperties('s1'='1')
+PREHOOK: type: ALTERTABLE_PROPERTIES
+PREHOOK: Input: db6@alter6
+PREHOOK: Output: db6@alter6
+POSTHOOK: query: alter table db6.alter6 set tblproperties('s1'='1')
+POSTHOOK: type: ALTERTABLE_PROPERTIES
+POSTHOOK: Input: db6@alter6
+POSTHOOK: Output: db6@alter6
+PREHOOK: query: describe extended alter6
+PREHOOK: type: DESCTABLE
+POSTHOOK: query: describe extended alter6
+POSTHOOK: type: DESCTABLE
+a                   	int                 	None                
+b                   	int                 	None                
+cc                  	int                 	None                
+p                   	string              	None                
+	 	 
+# Partition Information	 	 
+# col_name            	data_type           	comment             
+	 	 
+p                   	string              	None                
+	 	 
+#### A masked pattern was here ####
+PREHOOK: query: alter table db6.alter6 unset tblproperties('s1'='1')
+PREHOOK: type: ALTERTABLE_PROPERTIES
+PREHOOK: Input: db6@alter6
+PREHOOK: Output: db6@alter6
+POSTHOOK: query: alter table db6.alter6 unset tblproperties('s1'='1')
+POSTHOOK: type: ALTERTABLE_PROPERTIES
+POSTHOOK: Input: db6@alter6
+POSTHOOK: Output: db6@alter6
+PREHOOK: query: describe extended alter6
+PREHOOK: type: DESCTABLE
+POSTHOOK: query: describe extended alter6
+POSTHOOK: type: DESCTABLE
+a                   	int                 	None                
+b                   	int                 	None                
+cc                  	int                 	None                
+p                   	string              	None                
+	 	 
+# Partition Information	 	 
+# col_name            	data_type           	comment             
+	 	 
+p                   	string              	None                
+	 	 
+#### A masked pattern was here ####
+PREHOOK: query: alter table db6.alter6 partition (p='p0') set fileformat orc
+PREHOOK: type: ALTERPARTITION_FILEFORMAT
+PREHOOK: Input: db6@alter6
+PREHOOK: Output: db6@alter6@p=p0
+POSTHOOK: query: alter table db6.alter6 partition (p='p0') set fileformat orc
+POSTHOOK: type: ALTERPARTITION_FILEFORMAT
+POSTHOOK: Input: db6@alter6
+POSTHOOK: Input: db6@alter6@p=p0
+POSTHOOK: Output: db6@alter6@p=p0
+PREHOOK: query: show create table alter6
+PREHOOK: type: SHOW_CREATETABLE
+PREHOOK: Input: db6@alter6
+POSTHOOK: query: show create table alter6
+POSTHOOK: type: SHOW_CREATETABLE
+POSTHOOK: Input: db6@alter6
+CREATE  TABLE `alter6`(
+  `a` int, 
+  `b` int, 
+  `cc` int)
+PARTITIONED BY ( 
+  `p` string)
+ROW FORMAT SERDE 
+  'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' 
+STORED AS INPUTFORMAT 
+  'org.apache.hadoop.mapred.TextInputFormat' 
+OUTPUTFORMAT 
+  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+LOCATION
+#### A masked pattern was here ####
+TBLPROPERTIES (
+  'numPartitions'='1', 
+  'numFiles'='1', 
+#### A masked pattern was here ####
+  'numRows'='0', 
+  'totalSize'='16', 
+  'rawDataSize'='0')
+PREHOOK: query: alter table db6.alter6 partition column (p int)
+PREHOOK: type: null
+PREHOOK: Input: db6@alter6
+POSTHOOK: query: alter table db6.alter6 partition column (p int)
+POSTHOOK: type: null
+POSTHOOK: Input: db6@alter6
+POSTHOOK: Output: db6@alter6
+PREHOOK: query: describe db6.alter6
+PREHOOK: type: DESCTABLE
+POSTHOOK: query: describe db6.alter6
+POSTHOOK: type: DESCTABLE
+a                   	int                 	None                
+b                   	int                 	None                
+cc                  	int                 	None                
+p                   	int                 	None                
+	 	 
+# Partition Information	 	 
+# col_name            	data_type           	comment             
+	 	 
+p                   	int                 	None                
+PREHOOK: query: alter table db6.alter6 skewed by (a) on ('skew_a') stored as directories
+PREHOOK: type: ALTERTABLE_SKEWED
+PREHOOK: Input: db6@alter6
+PREHOOK: Output: db6@alter6
+POSTHOOK: query: alter table db6.alter6 skewed by (a) on ('skew_a') stored as directories
+POSTHOOK: type: ALTERTABLE_SKEWED
+POSTHOOK: Input: db6@alter6
+POSTHOOK: Output: db6@alter6
+PREHOOK: query: describe formatted db6.alter6
+PREHOOK: type: DESCTABLE
+POSTHOOK: query: describe formatted db6.alter6
+POSTHOOK: type: DESCTABLE
+# col_name            	data_type           	comment             
+	 	 
+a                   	int                 	None                
+b                   	int                 	None                
+cc                  	int                 	None                
+	 	 
+# Partition Information	 	 
+# col_name            	data_type           	comment             
+	 	 
+p                   	int                 	None                
+	 	 
+# Detailed Table Information	 	 
+Database:           	db6                 	 
+#### A masked pattern was here ####
+Protect Mode:       	None                	 
+Retention:          	0                   	 
+#### A masked pattern was here ####
+Table Type:         	MANAGED_TABLE       	 
+Table Parameters:	 	 
+#### A masked pattern was here ####
+	numFiles            	1                   
+	numPartitions       	1                   
+	numRows             	0                   
+	rawDataSize         	0                   
+	totalSize           	16                  
+#### A masked pattern was here ####
+	 	 
+# Storage Information	 	 
+SerDe Library:      	org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe	 
+InputFormat:        	org.apache.hadoop.mapred.TextInputFormat	 
+OutputFormat:       	org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat	 
+Compressed:         	No                  	 
+Num Buckets:        	-1                  	 
+Bucket Columns:     	[]                  	 
+Sort Columns:       	[]                  	 
+Stored As SubDirectories:	Yes                 	 
+Skewed Columns:     	[a]                 	 
+Skewed Values:      	[[skew_a]]          	 
+Storage Desc Params:	 	 
+	serialization.format	1                   
+PREHOOK: query: alter table db6.alter6 not stored as directories
+PREHOOK: type: ALTERTABLE_SKEWED
+PREHOOK: Input: db6@alter6
+PREHOOK: Output: db6@alter6
+POSTHOOK: query: alter table db6.alter6 not stored as directories
+POSTHOOK: type: ALTERTABLE_SKEWED
+POSTHOOK: Input: db6@alter6
+POSTHOOK: Output: db6@alter6
+PREHOOK: query: describe formatted db6.alter6
+PREHOOK: type: DESCTABLE
+POSTHOOK: query: describe formatted db6.alter6
+POSTHOOK: type: DESCTABLE
+# col_name            	data_type           	comment             
+	 	 
+a                   	int                 	None                
+b                   	int                 	None                
+cc                  	int                 	None                
+	 	 
+# Partition Information	 	 
+# col_name            	data_type           	comment             
+	 	 
+p                   	int                 	None                
+	 	 
+# Detailed Table Information	 	 
+Database:           	db6                 	 
+#### A masked pattern was here ####
+Protect Mode:       	None                	 
+Retention:          	0                   	 
+#### A masked pattern was here ####
+Table Type:         	MANAGED_TABLE       	 
+Table Parameters:	 	 
+#### A masked pattern was here ####
+	numFiles            	1                   
+	numPartitions       	1                   
+	numRows             	0                   
+	rawDataSize         	0                   
+	totalSize           	16                  
+#### A masked pattern was here ####
+	 	 
+# Storage Information	 	 
+SerDe Library:      	org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe	 
+InputFormat:        	org.apache.hadoop.mapred.TextInputFormat	 
+OutputFormat:       	org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat	 
+Compressed:         	No                  	 
+Num Buckets:        	-1                  	 
+Bucket Columns:     	[]                  	 
+Sort Columns:       	[]                  	 
+Skewed Columns:     	[a]                 	 
+Skewed Values:      	[[skew_a]]          	 
+Storage Desc Params:	 	 
+	serialization.format	1                   
+PREHOOK: query: alter table db6.alter6 not skewed
+PREHOOK: type: ALTERTABLE_SKEWED
+PREHOOK: Input: db6@alter6
+PREHOOK: Output: db6@alter6
+POSTHOOK: query: alter table db6.alter6 not skewed
+POSTHOOK: type: ALTERTABLE_SKEWED
+POSTHOOK: Input: db6@alter6
+POSTHOOK: Output: db6@alter6
+PREHOOK: query: describe formatted db6.alter6
+PREHOOK: type: DESCTABLE
+POSTHOOK: query: describe formatted db6.alter6
+POSTHOOK: type: DESCTABLE
+# col_name            	data_type           	comment             
+	 	 
+a                   	int                 	None                
+b                   	int                 	None                
+cc                  	int                 	None                
+	 	 
+# Partition Information	 	 
+# col_name            	data_type           	comment             
+	 	 
+p                   	int                 	None                
+	 	 
+# Detailed Table Information	 	 
+Database:           	db6                 	 
+#### A masked pattern was here ####
+Protect Mode:       	None                	 
+Retention:          	0                   	 
+#### A masked pattern was here ####
+Table Type:         	MANAGED_TABLE       	 
+Table Parameters:	 	 
+#### A masked pattern was here ####
+	numFiles            	1                   
+	numPartitions       	1                   
+	numRows             	0                   
+	rawDataSize         	0                   
+	totalSize           	16                  
+#### A masked pattern was here ####
+	 	 
+# Storage Information	 	 
+SerDe Library:      	org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe	 
+InputFormat:        	org.apache.hadoop.mapred.TextInputFormat	 
+OutputFormat:       	org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat	 
+Compressed:         	No                  	 
+Num Buckets:        	-1                  	 
+Bucket Columns:     	[]                  	 
+Sort Columns:       	[]                  	 
+Storage Desc Params:	 	 
+	serialization.format	1                   
+PREHOOK: query: drop table db6.alter6
+PREHOOK: type: DROPTABLE
+PREHOOK: Input: db6@alter6
+PREHOOK: Output: db6@alter6
+POSTHOOK: query: drop table db6.alter6
+POSTHOOK: type: DROPTABLE
+POSTHOOK: Input: db6@alter6
+POSTHOOK: Output: db6@alter6
+PREHOOK: query: drop database db6
+PREHOOK: type: DROPDATABASE
+POSTHOOK: query: drop database db6
+POSTHOOK: type: DROPDATABASE

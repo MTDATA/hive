@@ -3015,7 +3015,18 @@ public class DDLTask extends Task<DDLWork> implements Serializable {
     Table oldTbl = tbl.copy();
 
     if (alterTbl.getOp() == AlterTableDesc.AlterTableTypes.RENAME) {
-      tbl.setTableName(alterTbl.getNewName());
+      String[] names = Hive.getQualifiedNames(alterTbl.getNewName());
+      switch (names.length) {
+        case 2:
+          tbl.setDbName(names[0]);
+          tbl.setTableName(names[1]);
+          break;
+        case 1:
+          tbl.setTableName(names[0]);
+          break;
+        default:
+          throw new HiveException("Invalid table name: " + alterTbl.getNewName());
+      }
     } else if (alterTbl.getOp() == AlterTableDesc.AlterTableTypes.ADDCOLS) {
       List<FieldSchema> newCols = alterTbl.getNewCols();
       List<FieldSchema> oldCols = tbl.getCols();
