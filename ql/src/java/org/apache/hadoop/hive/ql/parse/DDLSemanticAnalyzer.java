@@ -169,7 +169,7 @@ public class DDLSemanticAnalyzer extends BaseSemanticAnalyzer {
     }
 
     public TablePartition(ASTNode tblPart) throws SemanticException {
-      tableName = unescapeIdentifier(tblPart.getChild(0).getText());
+      tableName = getUnescapedName((ASTNode) tblPart.getChild(0));
       if (tblPart.getChildCount() > 1) {
         ASTNode part = (ASTNode) tblPart.getChild(1);
         if (part.getToken().getType() == HiveParser.TOK_PARTSPEC) {
@@ -2295,7 +2295,7 @@ public class DDLSemanticAnalyzer extends BaseSemanticAnalyzer {
 
     // check if table exists.
     try {
-      tab = db.getTable(db.getCurrentDatabase(), tblName, true);
+      tab = db.getTable(tblName, true);
       inputs.add(new ReadEntity(tab));
     } catch (HiveException e) {
       throw new SemanticException(ErrorMsg.INVALID_TABLE.getMsg(tblName));
@@ -3031,7 +3031,7 @@ public class DDLSemanticAnalyzer extends BaseSemanticAnalyzer {
   }
 
   private Table getTable(String tblName, boolean throwException) throws SemanticException {
-    return getTable(db.getCurrentDatabase(), tblName, throwException);
+    return getTable(null, tblName, throwException);
   }
 
   private Table getTable(String database, String tblName, boolean throwException)

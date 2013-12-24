@@ -166,25 +166,7 @@ public class HiveAlterHandler implements AlterHandler {
               + newt.getTableName());
         }
         // also the location field in partition
-        List<Partition> parts = msdb.getPartitions(dbname, name, -1);
-        for (Partition part : parts) {
-          String oldPartLoc = part.getSd().getLocation();
-          Path oldPartLocPath = new Path(oldPartLoc);
-          String oldTblLocPath = new Path(oldTblLoc).toUri().getPath();
-          String newTblLocPath = new Path(newTblLoc).toUri().getPath();
-          if (oldPartLoc.contains(oldTblLocPath)) {
-            Path newPartLocPath = null;
-            URI oldUri = oldPartLocPath.toUri();
-            String newPath = oldUri.getPath().replace(oldTblLocPath,
-                                                      newTblLocPath);
-
-            newPartLocPath = new Path(oldUri.getScheme(),
-                                      oldUri.getAuthority(),
-                                      newPath);
-            part.getSd().setLocation(newPartLocPath.toString());
-            msdb.alterPartition(dbname, name, part.getValues(), part);
-          }
-        }
+        alterPartitionPath(msdb, dbname, name, oldTblLoc, newTblLoc);
       }
       // now finally call alter table
       msdb.alterTable(dbname, name, newt);
@@ -216,7 +198,9 @@ public class HiveAlterHandler implements AlterHandler {
           boolean revertMetaDataTransaction = false;
           try {
             msdb.openTransaction();
-            msdb.alterTable(dbname, newt.getTableName(), oldt);
+            alterPartitionPath(msdb, newt.getDbName(), newt.getTableName(),
+                newTblLoc, oldTblLoc);
+            msdb.alterTable(newt.getDbName(), newt.getTableName(), oldt);
             revertMetaDataTransaction = msdb.commitTransaction();
           } catch (Exception e1) {
             LOG.error("Reverting metadata opeation failed During HDFS operation failed", e1);
@@ -231,6 +215,38 @@ public class HiveAlterHandler implements AlterHandler {
     }
     if (!success) {
       throw new MetaException("Committing the alter table transaction was not successful.");
+    }
+  }
+
+  /**
+   * Change partition location
+   *
+   * @param msdb
+   * @param dbName
+   * @param tableName
+   * @param oldTblLoc old table location
+   * @param newTblLoc new table location
+   */
+  private void alterPartitionPath(RawStore msdb, String dbName, String tableName,
+      String oldTblLoc, String newTblLoc) throws MetaException, InvalidObjectException {
+    List<Partition> parts = msdb.getPartitions(dbName, tableName, -1);
+    for (Partition part : parts) {
+      String oldPartLoc = part.getSd().getLocation();
+      Path oldPartLocPath = new Path(oldPartLoc);
+      String oldTblLocPath = new Path(oldTblLoc).toUri().getPath();
+      String newTblLocPath = new Path(newTblLoc).toUri().getPath();
+      if (oldPartLoc.contains(oldTblLocPath)) {
+        Path newPartLocPath = null;
+        URI oldUri = oldPartLocPath.toUri();
+        String newPath = oldUri.getPath().replace(oldTblLocPath,
+            newTblLocPath);
+
+        newPartLocPath = new Path(oldUri.getScheme(),
+            oldUri.getAuthority(),
+            newPath);
+        part.getSd().setLocation(newPartLocPath.toString());
+        msdb.alterPartition(dbName, tableName, part.getValues(), part);
+      }
     }
   }
 
