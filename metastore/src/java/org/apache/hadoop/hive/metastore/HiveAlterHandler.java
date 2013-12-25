@@ -189,27 +189,35 @@ public class HiveAlterHandler implements AlterHandler {
       if (success && moveData) {
         // change the file name in hdfs
         // check that src exists otherwise there is no need to copy the data
+        boolean renameSuccess = false;
         try {
           if (srcFs.exists(srcPath)) {
             // rename the src to destination
-            srcFs.rename(srcPath, destPath);
+            renameSuccess = srcFs.rename(srcPath, destPath);
           }
         } catch (IOException e) {
-          boolean revertMetaDataTransaction = false;
-          try {
-            msdb.openTransaction();
-            alterPartitionPath(msdb, newt.getDbName(), newt.getTableName(),
-                newTblLoc, oldTblLoc);
-            msdb.alterTable(newt.getDbName(), newt.getTableName(), oldt);
-            revertMetaDataTransaction = msdb.commitTransaction();
-          } catch (Exception e1) {
-            LOG.error("Reverting metadata opeation failed During HDFS operation failed", e1);
-            if (!revertMetaDataTransaction) {
-              msdb.rollbackTransaction();
-            }
-          }
           throw new InvalidOperationException("Unable to access old location "
               + srcPath + " for table " + dbname + "." + name);
+        } finally {
+          if (!renameSuccess) {
+            boolean revertMetaDataTransaction = false;
+            try {
+              msdb.openTransaction();
+              alterPartitionPath(msdb, newt.getDbName(), newt.getTableName(),
+                  newTblLoc, oldTblLoc);
+              msdb.alterTable(newt.getDbName(), newt.getTableName(), oldt);
+              revertMetaDataTransaction = msdb.commitTransaction();
+            } catch (Exception e1) {
+              LOG.error("Reverting metadata opeation failed During HDFS operation failed", e1);
+              if (!revertMetaDataTransaction) {
+                msdb.rollbackTransaction();
+              }
+            }
+          }
+        }
+        if (!renameSuccess) {
+          throw new InvalidOperationException("Renaming hdfs path failed. src path is " + srcPath
+              + ", dest Path is " + destPath);
         }
       }
     }
